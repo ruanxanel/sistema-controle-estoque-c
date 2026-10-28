@@ -30,4 +30,9 @@ void buscarProduto(
     Produto produtos[],
     int quantidadeProdutos
 );
+
+void editarProduto(
+    Produto produto[],
+    int quantidade
+);
 #endif

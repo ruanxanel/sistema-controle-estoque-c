@@ -1,6 +1,7 @@
 #include "produto.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void cadastrarProduto(
     Produto **produtos,
@@ -107,4 +108,42 @@ int localizarProdutoPorCodigo(
         }
     }
     return -1;
+}
+
+void editarProduto(
+    Produto produtos[],
+    int quantidadeProdutos
+) {
+    int codigoBuscador;
+    char novoNome[100];
+    double novoPreco;
+    int novoEstoqueMinimo;
+
+    printf("Digite o codigo do produto que deseja editar: \n");
+    scanf("%d", &codigoBuscador);
+
+    int indice = localizarProdutoPorCodigo(
+        produtos,
+        quantidadeProdutos,
+        codigoBuscador
+    );
+
+    if (indice == -1) {
+        printf("Produto não encontrado!\n");
+        return;
+    }
+
+    printf("Digite o novo nome do produto: ");
+    scanf("%99s", novoNome);
+    strcpy(produtos[indice].nome, novoNome);
+
+    printf("Digite o novo preço do produto: ");
+    scanf("%lf", &novoPreco);
+    produtos[indice].preco = novoPreco;
+
+    printf("Digite a nova quantidade minima: ");
+    scanf("%d", &novoEstoqueMinimo);
+    produtos[indice].estoqueMinimo = novoEstoqueMinimo;
+
+    printf("Produto editado com sucesso\n");
 }

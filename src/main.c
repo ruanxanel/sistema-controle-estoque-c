@@ -43,7 +43,7 @@ void lerOpcaoAdmin(
         buscarProduto(*produtos, *quantidadeProdutos);
         break;
     case 4:
-        printf("opcao 4....");
+        editarProduto(*produtos, *quantidadeProdutos);
         break;
     case 5:
         printf("opcao 5...");
