@@ -54,7 +54,7 @@ void lerOpcaoAdmin(
         registrarEntrada(*produtos, *quantidadeProdutos);
         break;
     case 7:
-        printf("opcao 7....");
+        registrarSaida(*produtos, *quantidadeProdutos);
         break;
     case 8:
         printf("opcao 8....");
@@ -101,10 +101,10 @@ void lerOpcaoUsuario(
         buscarProduto(*produtos, *quantidadeProdutos);
         break;
     case 3:
-        printf("opcao registrar");
+        registrarEntrada(*produtos, *quantidadeProdutos);
         break;
     case 4:
-        printf("opcao 4....");
+        registrarSaida(*produtos, *quantidadeProdutos);
         break;
     case 5:
         printf("Opcao 5....");
