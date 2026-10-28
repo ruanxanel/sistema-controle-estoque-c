@@ -32,7 +32,12 @@ void buscarProduto(
 );
 
 void editarProduto(
-    Produto produto[],
-    int quantidade
+    Produto produtos[],
+    int quantidadeProdutos
+);
+
+void excluirProduto(
+    Produto produtos[],
+    int *quantidadeProdutos
 );
 #endif

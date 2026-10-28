@@ -147,3 +147,32 @@ void editarProduto(
 
     printf("Produto editado com sucesso\n");
 }
+
+void excluirProduto(
+    Produto produtos[],
+    int *quantidadeProdutos
+) {
+    int codigoBuscador;
+
+    printf("Digite o codigo do produto que deseja excluir: ");
+    scanf("%d", &codigoBuscador);
+
+    int indice = localizarProdutoPorCodigo(
+        produtos,
+        *quantidadeProdutos,
+        codigoBuscador
+    );
+
+    if (indice == -1) {
+        printf("Produto não encontrado!\n");
+        return;
+    }
+
+    for (int i = indice; i < *quantidadeProdutos - 1; i++) {
+        produtos[i] = produtos[i + 1];
+    }
+
+    (*quantidadeProdutos)--;
+    
+    printf("Produto excluído com sucesso!\n");
+}

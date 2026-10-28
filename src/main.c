@@ -46,7 +46,7 @@ void lerOpcaoAdmin(
         editarProduto(*produtos, *quantidadeProdutos);
         break;
     case 5:
-        printf("opcao 5...");
+        excluirProduto(*produtos, quantidadeProdutos);
         break;
     case 6:
         printf("opcao 6...");
