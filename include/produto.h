@@ -20,6 +20,12 @@ void listarProdutos(
     int quantidadeProdutos
 );
 
+int localizarProdutoPorCodigo(
+    Produto produtos[],
+    int quantidadeProdutos,
+    int codigo
+);
+
 void buscarProduto(
     Produto produtos[],
     int quantidadeProdutos
