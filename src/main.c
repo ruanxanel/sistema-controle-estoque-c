@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<stdlib.h>
+#include "produto.h"
 
 #define COR_VERMELHO "\033[1;31m"
 #define COR_VERDE "\033[1;32m"
@@ -23,14 +25,19 @@ void menuAdmin() {
     printf("\nEscolha uma opção: ");
 }
 
-void lerOpcaoAdmin(int opcao) {
+void lerOpcaoAdmin(
+    int opcao,
+    Produto **produtos,
+    int *quantidadeProdutos,
+    int *capacidade
+) {
 
     switch (opcao) {
     case 1:
-        printf("opcao 1....");
+        cadastrarProduto(produtos, quantidadeProdutos, capacidade);
         break;
     case 2:
-        printf("opcao 2...");
+        listarProdutos(*produtos, *quantidadeProdutos);
         break;
     case 3:
         printf("opcao 3...");
@@ -122,14 +129,19 @@ void menuPrincipal() {
 
 }
 
-void lerOpcaoPrincipal(int opcao) {
+void lerOpcaoPrincipal(
+    int opcao,
+    Produto **produtos,
+    int *quantidadeProdutos,
+    int *capacidade
+) {
     int opAdm, opUser;
     switch (opcao) {
         case 1:
             do {
                 menuAdmin();
                 scanf("%d", &opAdm);
-                lerOpcaoAdmin(opAdm);
+                lerOpcaoAdmin(opAdm, produtos, quantidadeProdutos, capacidade);
             } while (opAdm != 0);
             break;
         case 2:
@@ -149,13 +161,26 @@ void lerOpcaoPrincipal(int opcao) {
 }
 
 int main(void) {
+
     int op;
+    Produto *produtos; 
+    int quantidadeProdutos = 0;
+    int capacidade = 2;
+    produtos = malloc(capacidade * sizeof(Produto));
+
+    if(produtos == NULL) {
+        printf(COR_VERMELHO "Erro ao alocar memória!\n" COR_RESET);
+        return 1;
+    }
+    
     do {
         menuPrincipal();
         scanf("%d", &op);
         getchar();
-        lerOpcaoPrincipal(op);
+        lerOpcaoPrincipal(op, &produtos, &quantidadeProdutos, &capacidade);
     } while (op != 0);
+
+    free(produtos);
 
     return 0;
 }
