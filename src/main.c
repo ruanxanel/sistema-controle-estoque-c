@@ -40,7 +40,7 @@ void lerOpcaoAdmin(
         listarProdutos(*produtos, *quantidadeProdutos);
         break;
     case 3:
-        printf("opcao 3...");
+        buscarProduto(*produtos, *quantidadeProdutos);
         break;
     case 4:
         printf("opcao 4....");
@@ -86,13 +86,17 @@ void menuUsuario() {
     printf("\nEscolha uma opção: ");
 }
 
-void lerOpcaoUsuario(int opcao) {
+void lerOpcaoUsuario(
+    int opcao,
+    Produto **produtos,
+    int *quantidadeProdutos
+) {
     switch (opcao) {
     case 1:
-        printf("opcao Listar produto");
+        listarProdutos(*produtos, *quantidadeProdutos);
         break;
     case 2:
-        printf("opcao buscar produto");
+        buscarProduto(*produtos, *quantidadeProdutos);
         break;
     case 3:
         printf("opcao registrar");
@@ -148,7 +152,7 @@ void lerOpcaoPrincipal(
             do {
                 menuUsuario();
                 scanf("%d", &opUser);
-                lerOpcaoUsuario(opUser);
+                lerOpcaoUsuario(opUser, produtos, quantidadeProdutos);
             } while (opUser != 0);
             break;
         case 0:

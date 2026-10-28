@@ -19,4 +19,9 @@ void listarProdutos(
     Produto produtos[],
     int quantidadeProdutos
 );
+
+void buscarProduto(
+    Produto produtos[],
+    int quantidadeProdutos
+);
 #endif

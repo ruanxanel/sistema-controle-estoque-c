@@ -41,7 +41,7 @@ void cadastrarProduto(
 
     (*produtos)[*quantidadeProdutos] = produto;
     (*quantidadeProdutos)++;
-    printf("Produto %s cadastrado com sucesso", produto.nome);
+    printf("Produto %s cadastrado com sucesso\n", produto.nome);
 }
 
 void listarProdutos(
@@ -59,4 +59,26 @@ void listarProdutos(
         printf("Quantidade: %d\n", produtos[i].quantidade);
         printf("Estoque minimo: %d\n", produtos[i].estoqueMinimo);
     }
+}
+
+void buscarProduto(
+    Produto produtos[],
+    int quantidadeProdutos
+) {
+    int codigoBuscado;
+    
+    printf("Digite o codigo do produto: ");
+    scanf("%d", &codigoBuscado);
+
+    for (int i = 0; i < quantidadeProdutos; i++) {
+        if (produtos[i].codigo == codigoBuscado) {
+            printf("Codigo: %d\n", produtos[i].codigo);
+            printf("Nome: %s\n", produtos[i].nome);
+            printf("Preço: R$ %.2f\n", produtos[i].preco);
+            printf("Quantidade: %d\n", produtos[i].quantidade);
+            printf("Estoque minimo: %d\n", produtos[i].estoqueMinimo);
+            return;
+        }
+    }
+    printf("Produto não encontrado!\n");
 }
