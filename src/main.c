@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
+
 #include "produto.h"
+#include "estoque.h"
 
 #define COR_VERMELHO "\033[1;31m"
 #define COR_VERDE "\033[1;32m"
@@ -49,7 +51,7 @@ void lerOpcaoAdmin(
         excluirProduto(*produtos, quantidadeProdutos);
         break;
     case 6:
-        printf("opcao 6...");
+        registrarEntrada(*produtos, *quantidadeProdutos);
         break;
     case 7:
         printf("opcao 7....");
