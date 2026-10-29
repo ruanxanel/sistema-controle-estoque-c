@@ -1,10 +1,16 @@
 #include <stdio.h>
+#include <string.h>
+
 #include "estoque.h"
+#include "arquivo.h"
+#include "data.h"
 
 void registrarEntrada(
     Produto produtos[],
     int quantidadeProdutos
 ) {
+
+    Movimentacao movimentacao;
     int codigoBuscado;
     int novaQuantidade;
 
@@ -29,7 +35,26 @@ void registrarEntrada(
         printf("A entrada tem que ser maior que zero\n");
         return;
     }
+
+    movimentacao.codigoProduto = codigoBuscado;
+    strcpy(movimentacao.tipo, "ENTRADA");
+    movimentacao.quantidade = novaQuantidade;
+    
+    if (!obterDataHora(
+        movimentacao.dataHora,
+        sizeof(movimentacao.dataHora)
+    )) {
+        printf("Erro ao obter data e hora!\n");
+        return;
+    }
+    
+    if(!salvarMovimentacao(movimentacao)) {
+        printf("Não foi possível registrar a movimentação!\n");
+        return;
+    }
+
     produtos[indice].quantidade += novaQuantidade;
+
 
     printf("Quantidade adicionada\n");
 }
@@ -40,6 +65,7 @@ void registrarSaida(
 ) {
     int codigoBuscado;
     int novaQuantidade;
+    Movimentacao movimentacao;
 
     printf("Digite o codigo do produto: ");
     scanf("%d", &codigoBuscado);
@@ -66,7 +92,25 @@ void registrarSaida(
         return;
     }
     
+    movimentacao.codigoProduto = codigoBuscado;
+    strcpy(movimentacao.tipo, "SAIDA");
+    movimentacao.quantidade = novaQuantidade;
+
+    if (!obterDataHora(
+        movimentacao.dataHora,
+        sizeof(movimentacao.dataHora)
+    )) {
+        printf("Erro ao obter data e hora!\n");
+        return;
+    }
+    
+    if (!salvarMovimentacao(movimentacao)) {
+        printf("Não foi possível registrar a movimentação!\n");
+        return;
+    }
+
     produtos[indice].quantidade -= novaQuantidade;
+    
     printf("Saída registrada com sucesso!\n");
 
     if (produtos[indice].quantidade < produtos[indice].estoqueMinimo) {

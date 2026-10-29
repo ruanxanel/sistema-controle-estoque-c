@@ -3,6 +3,7 @@
 
 #include "produto.h"
 #include "estoque.h"
+#include "arquivo.h"
 
 #define COR_VERMELHO "\033[1;31m"
 #define COR_VERDE "\033[1;32m"
@@ -60,7 +61,7 @@ void lerOpcaoAdmin(
         listarEstoqueBaixo(*produtos, *quantidadeProdutos);
         break;
     case 9:
-        printf("opcao 9.....");
+        listarMovimentacoes();
         break;
     case 0:
         printf(COR_VERDE "Voltando....\n" COR_RESET);
@@ -110,7 +111,7 @@ void lerOpcaoUsuario(
         listarEstoqueBaixo(*produtos, *quantidadeProdutos);
         break;
     case 6:
-        printf("opcao 6...");
+        listarMovimentacoes();
         break;
     case 0:
         printf(COR_VERDE "Voltando...\n" COR_RESET);

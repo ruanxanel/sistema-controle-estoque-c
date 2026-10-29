@@ -3,6 +3,13 @@
 
 #include "produto.h"
 
+typedef struct movimentacao {
+    int codigoProduto;
+    char tipo[10];
+    int quantidade;
+    char dataHora[20];
+} Movimentacao;
+
 void registrarEntrada(
     Produto produtos[],
     int quantidadeProdutos
