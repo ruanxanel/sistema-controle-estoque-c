@@ -12,4 +12,9 @@ void registrarSaida(
     int quantidadeProdutos
 );
 
+void listarEstoqueBaixo(
+    Produto produtos[],
+    int quantidadeProdutos
+);
+
 #endif
