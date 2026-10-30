@@ -9,11 +9,30 @@
 #define COR_VERMELHO "\033[1;31m"
 #define COR_VERDE "\033[1;32m"
 #define COR_RESET "\033[0m"
+#define COR_AZUL "\033[1;34m"
 
-void menuAdmin() {
-    printf("\n======================================\n");
+static void pausarTela(void) {
+    int caractere;
+
+    printf("\nPressione ENTER para continuar...");
+    fflush(stdout);
+
+    while ((caractere = getchar()) != '\n' && caractere != EOF) {
+    }
+}
+static void limparTela(void) {
+    printf("\033[2J\033[H");
+    fflush(stdout);
+}
+
+
+
+static void menuAdmin() {
+    limparTela();
+
+    printf(COR_AZUL "\n======================================\n");
     printf("         PAINEL ADMINISTRADOR         \n");
-    printf("======================================\n\n");
+    printf("======================================\n\n" COR_RESET);
 
     printf("1 - Cadastrar produto\n");
     printf("2 - Listar produtos\n");
@@ -24,12 +43,9 @@ void menuAdmin() {
     printf("7 - Registrar saída\n");
     printf("8 - Produtos com estoque baixo\n");
     printf("9 - Histórico de movimentações\n");
-    printf("0 - Voltar ao menu principal\n");
-
-    
+    printf("0 - Voltar ao menu principal\n\n");
 }
-
-void lerOpcaoAdmin(
+static void lerOpcaoAdmin(
     int opcao,
     Produto **produtos,
     int *quantidadeProdutos,
@@ -65,19 +81,27 @@ void lerOpcaoAdmin(
         listarMovimentacoes();
         break;
     case 0:
-        printf(COR_VERDE "Voltando....\n" COR_RESET);
+        printf(COR_VERDE "Voltando ao menu principal...\n" COR_RESET);
         break;
     default:
-        printf(COR_VERMELHO "Opção inválida" COR_RESET);
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         break;
     }
+
+    if (opcao != 0) {
+        pausarTela();
+    }
+    
 }
 
 
-void menuUsuario() {
-    printf("\n======================================\n");
+
+static void menuUsuario() {
+    limparTela();
+
+    printf(COR_AZUL "\n======================================\n");
     printf("           PAINEL USUÁRIO             \n");
-    printf("======================================\n\n");
+    printf("======================================\n\n" COR_RESET);
 
     printf("1 - Listar produtos\n");
     printf("2 - Buscar produto\n");
@@ -85,12 +109,11 @@ void menuUsuario() {
     printf("4 - Registrar saída\n");
     printf("5 - Produtos com estoque baixo\n");
     printf("6 - Histórico de movimentações\n");
-    printf("0 - Voltar ao menu principal\n");
+    printf("0 - Voltar ao menu principal\n\n");
 
     
 }
-
-void lerOpcaoUsuario(
+static void lerOpcaoUsuario(
     int opcao,
     Produto **produtos,
     int *quantidadeProdutos
@@ -115,35 +138,39 @@ void lerOpcaoUsuario(
         listarMovimentacoes();
         break;
     case 0:
-        printf(COR_VERDE "Voltando...\n" COR_RESET);
+        printf(COR_VERDE "Voltando ao menu principal...\n" COR_RESET);
         break;
     default:
-        printf(COR_VERMELHO "Opção inválida" COR_RESET);
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         break;
+    }
+
+    if (opcao != 0) {
+        pausarTela();
     }
 }
 
-void menuPrincipal() {
 
-    printf("======================================\n");
+
+void menuPrincipal(void) {
+    limparTela();
+
+    printf(COR_AZUL "\n======================================\n");
     printf("    SISTEMA DE CONTROLE DE ESTOQUE    \n");
-    printf("======================================\n\n");
+    printf("======================================\n\n" COR_RESET);
 
     printf("1 - Administrador\n");
     printf("2 - Usuário\n");
-    printf("0 - Sair\n");
-
-    
-
+    printf("0 - Sair\n\n");
 }
-
 int lerOpcaoPrincipal(
     int opcao,
     Produto **produtos,
     int *quantidadeProdutos,
     int *capacidade
 ) {
-    int opAdm, opUser;
+    int opAdm = -1;
+    int opUser = -1;
     switch (opcao) {
         case 1:
             do {
@@ -196,7 +223,7 @@ int lerOpcaoPrincipal(
             printf(COR_VERDE "Saindo...\n" COR_RESET);
             break;
         default:
-            printf(COR_VERMELHO "Opção invalida\n" COR_RESET);
+            printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
             break;
     }
     return 1;
