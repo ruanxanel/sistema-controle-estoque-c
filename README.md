@@ -87,7 +87,7 @@ A pasta `build/` é criada automaticamente na compilação e não é enviada ao 
 1. Clone o repositório:
 
    ```bash
-   git clone <URL_DO_REPOSITORIO>
+   git clone https://github.com/ruanxanel/sistema-controle-estoque-c
    cd <NOME_DA_PASTA>
    ```
 
