@@ -179,6 +179,13 @@ int main(void) {
         printf(COR_VERMELHO "Erro ao alocar memória!\n" COR_RESET);
         return 1;
     }
+
+    if (!carregarProdutos(&produtos, &quantidadeProdutos, &capacidade)) {
+        printf("Erro ao carregar os produtos!\n");
+        free(produtos);
+        return 1;
+    }
+    
     
     do {
         menuPrincipal();
@@ -186,6 +193,12 @@ int main(void) {
         getchar();
         lerOpcaoPrincipal(op, &produtos, &quantidadeProdutos, &capacidade);
     } while (op != 0);
+
+    if (!salvarProdutos(produtos, quantidadeProdutos)) {
+        printf("Erro ao salvar os produtos!\n");
+        free(produtos);
+        return 1;
+    }
 
     free(produtos);
 

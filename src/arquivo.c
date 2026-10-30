@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <limits.h>
+#include <stdlib.h>
+
 #include "arquivo.h"
 
 int salvarMovimentacao(
@@ -79,4 +82,116 @@ void listarMovimentacoes(
     }
     
     fclose(arquivo);
+}
+
+int salvarProdutos(
+    Produto produtos[],
+    int quantidadeProdutos
+) {
+    FILE *arquivo = fopen("data/produtos.dat", "wb");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo!\n");
+        return 0;
+    }
+
+    size_t gravados = fwrite(
+        produtos,
+        sizeof(Produto),
+        quantidadeProdutos,
+        arquivo
+    );
+
+    if (gravados != (size_t) quantidadeProdutos) {
+        printf("Erro ao salvar os produtos!\n");
+        fclose(arquivo);
+        return 0;
+    }
+    
+    if (fclose(arquivo) == EOF) {
+        printf("Erro ao fechar o arquivo!\n");
+        return 0;
+    }
+    
+    return 1;
+}
+
+int carregarProdutos(
+    Produto **produtos,
+    int *quantidadeProdutos,
+    int *capacidade
+) {
+    FILE *arquivo = fopen("data/produtos.dat", "rb");
+
+    if (arquivo == NULL) {
+        return 1;
+    }
+    
+    if (fseek(arquivo, 0, SEEK_END) != 0) {
+        printf("Erro ao acessar o final do arquivo!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    long tamanhoArquivo = ftell(arquivo);
+
+    if (tamanhoArquivo == -1L) {
+        printf("Erro ao obter o tamanho do arquivo!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    if ((size_t)tamanhoArquivo % sizeof(Produto) != 0) {
+        printf("Erro: arquivo de produtos inválido!\n");
+        fclose(arquivo);
+        return 0;
+    }
+    
+    size_t totalProdutos = (size_t)tamanhoArquivo / sizeof(Produto);
+
+    if (totalProdutos > INT_MAX) {
+        printf("Erro: quantidade de produtos excede o limite!\n");
+        fclose(arquivo);
+        return 0;
+    }
+    
+    if (totalProdutos > (size_t)*capacidade) {
+        Produto *temp = realloc(
+            *produtos,
+            totalProdutos * sizeof(Produto)
+        );
+
+        if (temp == NULL) {
+            printf("Erro ao relocar memoria!\n");
+            fclose(arquivo);
+            return 0;
+        }
+        
+        *produtos = temp;
+        *capacidade = (int) totalProdutos;
+    }
+
+    rewind(arquivo);
+    
+    size_t lidos = fread(
+        *produtos,
+        sizeof(Produto),
+        totalProdutos,
+        arquivo
+    );
+
+    if (lidos != totalProdutos) {
+        printf("Erro ao carregar os produtos!\n");
+        fclose(arquivo);
+        return 0;
+    }
+    
+    *quantidadeProdutos = (int) totalProdutos;
+
+    if (fclose(arquivo) == EOF) {
+        printf("Erro ao fechar o arquivo!\n");
+        return 0;
+    }
+
+    return 1;
 }
