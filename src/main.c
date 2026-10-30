@@ -2,11 +2,11 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "entrada.h"
 #include "produto.h"
 #include "arquivo.h"
 
 #define COR_VERMELHO "\033[1;31m"
-#define COR_VERDE "\033[1;32m"
 #define COR_RESET "\033[0m"
 
 int main(void) {
@@ -31,14 +31,24 @@ int main(void) {
     do {
         menuPrincipal();
 
-        scanf("%d", &op);
+        int resultado = lerInteiro("Escolha uma opção: ", &op);
 
-        lerOpcaoPrincipal(
+        if (resultado == 0) {
+            continue;
+        }
+        if (resultado == -1) {
+            break;
+        }
+        
+
+        if (!lerOpcaoPrincipal(
             op,
             &produtos,
             &quantidadeProdutos,
             &capacidade
-        );
+        )) {
+            break;
+        }
 
     } while (op != 0);
 

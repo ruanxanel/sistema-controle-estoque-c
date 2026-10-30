@@ -5,7 +5,7 @@
 
 void menuPrincipal(void);
 
-void lerOpcaoPrincipal(
+int lerOpcaoPrincipal(
     int opcao,
     Produto **produtos,
     int *quantidadeProdutos,

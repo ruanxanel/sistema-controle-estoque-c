@@ -4,6 +4,7 @@
 #include "produto.h"
 #include "estoque.h"
 #include "arquivo.h"
+#include "entrada.h"
 
 #define COR_VERMELHO "\033[1;31m"
 #define COR_VERDE "\033[1;32m"
@@ -25,7 +26,7 @@ void menuAdmin() {
     printf("9 - Histórico de movimentações\n");
     printf("0 - Voltar ao menu principal\n");
 
-    printf("\nEscolha uma opção: ");
+    
 }
 
 void lerOpcaoAdmin(
@@ -86,7 +87,7 @@ void menuUsuario() {
     printf("6 - Histórico de movimentações\n");
     printf("0 - Voltar ao menu principal\n");
 
-    printf("\nEscolha uma opção: ");
+    
 }
 
 void lerOpcaoUsuario(
@@ -132,11 +133,11 @@ void menuPrincipal() {
     printf("2 - Usuário\n");
     printf("0 - Sair\n");
 
-    printf("\nEscolha uma opção: ");
+    
 
 }
 
-void lerOpcaoPrincipal(
+int lerOpcaoPrincipal(
     int opcao,
     Produto **produtos,
     int *quantidadeProdutos,
@@ -147,16 +148,49 @@ void lerOpcaoPrincipal(
         case 1:
             do {
                 menuAdmin();
-                scanf("%d", &opAdm);
-                lerOpcaoAdmin(opAdm, produtos, quantidadeProdutos, capacidade);
+                
+                int resultado = lerInteiro("Escolha uma opção: ", &opAdm);
+
+                if (resultado == 0) {
+                    continue;
+                }
+                
+                if (resultado == -1) {
+                    return 0;
+                }
+
+                lerOpcaoAdmin(
+                    opAdm, 
+                    produtos, 
+                    quantidadeProdutos, 
+                    capacidade
+                );
+
             } while (opAdm != 0);
+
             break;
         case 2:
             do {
                 menuUsuario();
-                scanf("%d", &opUser);
-                lerOpcaoUsuario(opUser, produtos, quantidadeProdutos);
+                
+                int resultado = lerInteiro("Escolha uma opção: ", &opUser);
+
+                if (resultado == 0) {
+                    continue;
+                }
+                
+                if (resultado == -1) {
+                    return 0;
+                }
+                
+                lerOpcaoUsuario(
+                    opUser, 
+                    produtos, 
+                    quantidadeProdutos
+                );
+
             } while (opUser != 0);
+
             break;
         case 0:
             printf(COR_VERDE "Saindo...\n" COR_RESET);
@@ -165,4 +199,5 @@ void lerOpcaoPrincipal(
             printf(COR_VERMELHO "Opção invalida\n" COR_RESET);
             break;
     }
+    return 1;
 }
