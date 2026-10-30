@@ -1,8 +1,16 @@
-#include "produto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "produto.h"
+
+static void exibirProduto(Produto produto) {
+    printf("Codigo: %d\n", produto.codigo);
+    printf("Nome: %s\n", produto.nome);
+    printf("Preço: R$ %.2f\n", produto.preco);
+    printf("Quantidade: %d\n", produto.quantidade);
+    printf("Estoque minimo: %d\n", produto.estoqueMinimo);
+}
 void cadastrarProduto(
     Produto **produtos,
     int *quantidadeProdutos,
@@ -65,11 +73,7 @@ void listarProdutos(
         return;
     }
     for (int i = 0; i < quantidadeProdutos; i++) {
-        printf("Codigo: %d\n", produtos[i].codigo);
-        printf("Nome: %s\n", produtos[i].nome);
-        printf("Preço: R$ %.2f\n", produtos[i].preco);
-        printf("Quantidade: %d\n", produtos[i].quantidade);
-        printf("Estoque minimo: %d\n", produtos[i].estoqueMinimo);
+        exibirProduto(produtos[i]);
     }
 }
 
@@ -90,11 +94,7 @@ void buscarProduto(
         printf("Produto não encontrado!\n");
         return;
     } 
-    printf("Codigo: %d\n", produtos[indice].codigo);
-    printf("Nome: %s\n", produtos[indice].nome);
-    printf("Preço: R$ %.2f\n", produtos[indice].preco);
-    printf("Quantidade: %d\n", produtos[indice].quantidade);
-    printf("Estoque minimo: %d\n", produtos[indice].estoqueMinimo);
+    exibirProduto(produtos[indice]);
 }
 
 int localizarProdutoPorCodigo(
