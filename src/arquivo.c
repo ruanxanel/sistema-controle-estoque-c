@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "arquivo.h"
 
@@ -41,7 +42,11 @@ void listarMovimentacoes(
     FILE *arquivo = fopen("data/movimentacao.dat", "rb");
 
     if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo!\n");
+        if (errno == ENOENT) {
+            printf("Nenhuma movimentação registrada!\n");
+        } else {
+            perror("Erro ao abrir o historico");
+        }
         return;
     }
 
@@ -84,14 +89,15 @@ void listarMovimentacoes(
     fclose(arquivo);
 }
 
+
 int salvarProdutos(
     Produto produtos[],
     int quantidadeProdutos
 ) {
-    FILE *arquivo = fopen("data/produtos.dat", "wb");
+    FILE *arquivo = fopen("data/produtos.tmp", "wb");
 
     if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo!\n");
+        perror("Erro ao abrir arquivo temporário");
         return 0;
     }
 
@@ -105,16 +111,25 @@ int salvarProdutos(
     if (gravados != (size_t) quantidadeProdutos) {
         printf("Erro ao salvar os produtos!\n");
         fclose(arquivo);
+        remove("data/produtos.tmp");
         return 0;
     }
-    
+
     if (fclose(arquivo) == EOF) {
         printf("Erro ao fechar o arquivo!\n");
+        remove("data/produtos.tmp");
         return 0;
     }
-    
+
+    if (rename("data/produtos.tmp", "data/produtos.dat") != 0) {
+        perror("Erro ao substituir arquivo de produtos");
+        remove("data/produtos.tmp");
+        return 0;
+    }
+
     return 1;
 }
+
 
 int carregarProdutos(
     Produto **produtos,
@@ -124,7 +139,12 @@ int carregarProdutos(
     FILE *arquivo = fopen("data/produtos.dat", "rb");
 
     if (arquivo == NULL) {
-        return 1;
+        if (errno == ENOENT) {
+            return 1;
+        }
+        
+        perror("Erro ao abrir arquivo de produtos");
+        return 0;
     }
     
     if (fseek(arquivo, 0, SEEK_END) != 0) {
