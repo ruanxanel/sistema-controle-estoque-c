@@ -175,30 +175,125 @@ void editarProduto(Produto produtos[],int quantidadeProdutos) {
         return;
     }
 
-    if (lerTexto("Digite o novo nome do produto: ", 
-                novoNome,
-                sizeof(novoNome)) != 1) {
-        printf("Nome inválido!\n");
-        return;
-    }
+    int opcao = -1;
+
+    do {
+
+        printf("\n====================================\n");
+        printf("   EDITAR PRODUTO\n");
+        printf("====================================\n\n");
+        
+        exibirProduto(produtos[indice]);
+
+        printf("\n1 - Alterar nome\n");
+        printf("2 - Alterar preço\n");
+        printf("3 - Alterar estoque mínimo\n");
+        printf("4 - Alterar todos os dados\n");
+        printf("0 - Voltar\n\n");
+
+        int resultado = lerInteiro("Escolha uma opção: ", &opcao);
+
+        if (resultado == 0) {
+            continue;
+        }
+
+        if (resultado == -1) {
+            return;
+        }
+        
+        switch (opcao) {
+            case 1:
+                if (lerTexto(
+                    "Digite o novo nome: ", 
+                    novoNome, 
+                    sizeof(novoNome)
+                ) != 1) {
+                    printf("Nome inválido!\n");
+                    break;
+                }
+                
+                strcpy(produtos[indice].nome, novoNome);
+                printf("Nome atualizado com sucesso!\n");
+                break;
+            case 2:
+                if (lerDouble("Digite o novo preço: ", &novoPreco) != 1) {
+                    printf("Preço inválido!\n");
+                    break;
+                }
+
+                if (novoPreco < 0) {
+                    printf("O preço não pode ser negativo!\n");
+                    break;
+                }
+                
+                produtos[indice].preco = novoPreco;
+                printf("Preço atualizado com sucesso!\n");
+                break;
+            case 3:
+                if (lerInteiro(
+                    "Digite o novo estoque mínimo: ",
+                    &novoEstoqueMinimo
+                ) != 1) {
+                    printf("Estoque mínimo inválido!\n");
+                    break;
+                }
+
+                if (novoEstoqueMinimo < 0) {
+                    printf("O estoque mínimo não pode ser negativo!\n");
+                    break;
+                }
+                
+                produtos[indice].estoqueMinimo = novoEstoqueMinimo;
+                printf("Estoque mínimo atualizado com sucesso!\n");
+                break;
+            case 4:
+                if (lerTexto(
+                    "Digite o novo nome: ", 
+                    novoNome, 
+                    sizeof(novoNome)
+                ) != 1) {
+                    printf("Nome inválido!\n");
+                    break;
+                }
+                
+                if (lerDouble("Digite o novo preço: ", &novoPreco) != 1) {
+                    printf("Preço inválido!\n");
+                    break;
+                }
+
+                if (novoPreco < 0) {
+                    printf("O preço não pode ser negativo!\n");
+                    break;
+                }
+
+                if (lerInteiro(
+                    "Digite o novo estoque mínimo: ",
+                    &novoEstoqueMinimo
+                ) != 1) {
+                    printf("Estoque mínimo inválido!\n");
+                    break;
+                }
+
+                if (novoEstoqueMinimo < 0) {
+                    printf("O estoque mínimo não pode ser negativo!\n");
+                    break;
+                }
+
+                strcpy(produtos[indice].nome, novoNome);
+                produtos[indice].preco = novoPreco;
+                produtos[indice].estoqueMinimo = novoEstoqueMinimo;
+                printf("Dados atualizados com sucesso!\n");
+
+                break;
+            case 0:
+                printf("Voltando ao menu Administrador...\n");
+                break;
+            default:
+                printf("Opção inválida!\n");
+                break;
+            }
+    } while (opcao != 0);
     
-
-    if (lerDouble("Digite o novo preço: ", &novoPreco) != 1) {
-        printf("Preço inválido!\n");
-        return;
-    }
-    
-    if (lerInteiro("Digite o novo estoque mínimo: ", &novoEstoqueMinimo) != 1
-        || novoEstoqueMinimo < 0) {
-        printf("Estoque mínimo inválid!\n");
-        return;
-    }
-
-    strcpy(produtos[indice].nome, novoNome);
-    produtos[indice].preco = novoPreco;
-    produtos[indice].estoqueMinimo = novoEstoqueMinimo;
-
-    printf("Produto editado com sucesso!\n");
 }
 
 
