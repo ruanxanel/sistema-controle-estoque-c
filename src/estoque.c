@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "estoque.h"
 #include "arquivo.h"
 #include "data.h"
+#include "entrada.h"
 
 void registrarEntrada(
     Produto produtos[],
@@ -14,9 +16,11 @@ void registrarEntrada(
     int codigoBuscado;
     int novaQuantidade;
 
-    printf("Digite o codigo do produto: ");
-    scanf("%d", &codigoBuscado);
-
+    if (lerInteiro("Digite o codigo do produto: ", &codigoBuscado) != 1) {
+        printf("Código inválido!\n");
+        return;
+    }
+    
     int indice = localizarProdutoPorCodigo(
         produtos,
         quantidadeProdutos,
@@ -28,11 +32,18 @@ void registrarEntrada(
         return;
     }
     
-    printf("Digite a quantidade de produtos que quer adicionar: ");
-    scanf("%d", &novaQuantidade);
-
+    if (lerInteiro("Digite a quantidade para adicionar: ", &novaQuantidade) != 1) {
+        printf("Quantidade inválida!\n");
+        return;
+    }
+    
     if (novaQuantidade <= 0) {
         printf("A entrada tem que ser maior que zero\n");
+        return;
+    }
+    
+    if (novaQuantidade > INT_MAX - produtos[indice].quantidade) {
+        printf("Erro: a quantidade ultrapassa o limite permitido!\n");
         return;
     }
 
@@ -47,7 +58,7 @@ void registrarEntrada(
         printf("Erro ao obter data e hora!\n");
         return;
     }
-    
+
     if(!salvarMovimentacao(movimentacao)) {
         printf("Não foi possível registrar a movimentação!\n");
         return;
@@ -67,8 +78,10 @@ void registrarSaida(
     int novaQuantidade;
     Movimentacao movimentacao;
 
-    printf("Digite o codigo do produto: ");
-    scanf("%d", &codigoBuscado);
+    if (lerInteiro("Digite o codigo do produto: ", &codigoBuscado) != 1) {
+        printf("Código inválido!\n");
+        return;
+    }
 
     int indice = localizarProdutoPorCodigo(
         produtos,
@@ -81,16 +94,22 @@ void registrarSaida(
         return;
     }
 
-    printf("Digite a quantidade do produto: ");
-    scanf("%d", &novaQuantidade);
+    if (lerInteiro("Digite a quantidade para saída: ", &novaQuantidade) != 1) {
+        printf("Quantidade inválida!\n");
+        return;
+    }
 
     if (novaQuantidade <= 0) {
         printf("A quantidade deve ser acima de 0\n");
         return;
-    } else if (novaQuantidade > produtos[indice].quantidade) {
-        printf("Quantidade invalida. Quantidade disponivel: %d\n", produtos[indice].quantidade);
+    }
+
+    if (novaQuantidade > produtos[indice].quantidade) {
+        printf("Estoque insuficiente! Disponível: %d\n",
+            produtos[indice].quantidade);
         return;
     }
+    
     
     movimentacao.codigoProduto = codigoBuscado;
     strcpy(movimentacao.tipo, "SAIDA");
