@@ -6,6 +6,7 @@
 #include "arquivo.h"
 #include "data.h"
 #include "entrada.h"
+#include "cores.h"
 
 void registrarEntrada(
     Produto produtos[],
@@ -17,7 +18,7 @@ void registrarEntrada(
     int novaQuantidade;
 
     if (lerInteiro("Digite o codigo do produto: ", &codigoBuscado) != 1) {
-        printf("Código inválido!\n");
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
     
@@ -28,22 +29,22 @@ void registrarEntrada(
     );
 
     if (indice == -1) {
-        printf("Produto não encontrado!\n");
+        printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
         return;
     }
     
     if (lerInteiro("Digite a quantidade para adicionar: ", &novaQuantidade) != 1) {
-        printf("Quantidade inválida!\n");
+        printf(COR_VERMELHO "Quantidade inválida!\n" COR_RESET);
         return;
     }
     
     if (novaQuantidade <= 0) {
-        printf("A entrada tem que ser maior que zero\n");
+        printf(COR_VERMELHO "A entrada tem que ser maior que zero\n" COR_RESET);
         return;
     }
     
     if (novaQuantidade > INT_MAX - produtos[indice].quantidade) {
-        printf("Erro: a quantidade ultrapassa o limite permitido!\n");
+        printf(COR_VERMELHO "Erro: a quantidade ultrapassa o limite permitido!\n" COR_RESET);
         return;
     }
 
@@ -55,19 +56,19 @@ void registrarEntrada(
         movimentacao.dataHora,
         sizeof(movimentacao.dataHora)
     )) {
-        printf("Erro ao obter data e hora!\n");
+        printf(COR_VERMELHO "Erro ao obter data e hora!\n" COR_RESET);
         return;
     }
 
     if(!salvarMovimentacao(movimentacao)) {
-        printf("Não foi possível registrar a movimentação!\n");
+        printf(COR_VERMELHO "Não foi possível registrar a movimentação!\n" COR_RESET);
         return;
     }
 
     produtos[indice].quantidade += novaQuantidade;
 
 
-    printf("Quantidade adicionada\n");
+    printf(COR_VERDE "Quantidade adicionada com sucesso!\n" COR_RESET);
 }
 
 void registrarSaida(
@@ -79,7 +80,7 @@ void registrarSaida(
     Movimentacao movimentacao;
 
     if (lerInteiro("Digite o codigo do produto: ", &codigoBuscado) != 1) {
-        printf("Código inválido!\n");
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
 
@@ -90,22 +91,22 @@ void registrarSaida(
     );
 
     if (indice == -1) {
-        printf("Produto não encontrado!!\n");
+        printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
         return;
     }
 
     if (lerInteiro("Digite a quantidade para saída: ", &novaQuantidade) != 1) {
-        printf("Quantidade inválida!\n");
+        printf(COR_VERMELHO "Quantidade inválida!\n" COR_RESET);
         return;
     }
 
     if (novaQuantidade <= 0) {
-        printf("A quantidade deve ser acima de 0\n");
+        printf(COR_VERMELHO "A quantidade deve ser maior que zero!\n" COR_RESET);
         return;
     }
 
     if (novaQuantidade > produtos[indice].quantidade) {
-        printf("Estoque insuficiente! Disponível: %d\n",
+        printf(COR_VERMELHO "Estoque insuficiente! Disponível: %d\n" COR_RESET,
             produtos[indice].quantidade);
         return;
     }
@@ -119,24 +120,29 @@ void registrarSaida(
         movimentacao.dataHora,
         sizeof(movimentacao.dataHora)
     )) {
-        printf("Erro ao obter data e hora!\n");
+        printf(COR_VERMELHO "Erro ao obter data e hora!\n" COR_RESET);
         return;
     }
     
     if (!salvarMovimentacao(movimentacao)) {
-        printf("Não foi possível registrar a movimentação!\n");
+        printf(COR_VERMELHO "Não foi possível registrar a movimentação!\n" COR_RESET);
         return;
     }
 
     produtos[indice].quantidade -= novaQuantidade;
     
-    printf("Saída registrada com sucesso!\n");
+    printf(COR_VERDE "Saída registrada com sucesso!\n" COR_RESET);
 
     if (produtos[indice].quantidade < produtos[indice].estoqueMinimo) {
-        printf("ALERTA: Produto %s está abaixo do estoque mínimo!\n Quantidade atual: %d\n Estoque mínimo: %d\n",
-        produtos[indice].nome,
-        produtos[indice].quantidade,
-        produtos[indice].estoqueMinimo
+        printf(
+            COR_AMARELO
+            "ALERTA: Produto %s está abaixo do estoque mínimo!\n"
+            "Quantidade atual: %d\n"
+            "Estoque mínimo: %d\n"
+            COR_RESET,
+            produtos[indice].nome,
+            produtos[indice].quantidade,
+            produtos[indice].estoqueMinimo
         );
     }
 }
@@ -149,7 +155,9 @@ void listarEstoqueBaixo(
     for (int i = 0; i < quantidadeProdutos; i++) {
         if (produtos[i].quantidade < produtos[i].estoqueMinimo) {
             printf(
-                "Produto: %s | Quantidade atual: %d | Estoque mínimo: %d | situação: Estoque baixo\n",
+                COR_AMARELO
+                "Produto: %s | Quantidade atual: %d | Estoque mínimo: %d | situação: Estoque baixo\n"
+                COR_AMARELO,
                 produtos[i].nome,
                 produtos[i].quantidade,
                 produtos[i].estoqueMinimo
@@ -158,7 +166,7 @@ void listarEstoqueBaixo(
         }
     }
     if (encontrouEstoqueBaixo == 0) {
-        printf("Nenhum produto com estoque baixo\n");
+        printf(COR_VERDE "Nenhum produto com estoque baixo\n" COR_RESET);
     }
     
 }

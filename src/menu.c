@@ -5,11 +5,7 @@
 #include "estoque.h"
 #include "arquivo.h"
 #include "entrada.h"
-
-#define COR_VERMELHO "\033[1;31m"
-#define COR_VERDE "\033[1;32m"
-#define COR_RESET "\033[0m"
-#define COR_AZUL "\033[1;34m"
+#include "cores.h"
 
 static void pausarTela(void) {
     int caractere;
