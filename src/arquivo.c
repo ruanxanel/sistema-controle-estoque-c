@@ -1,217 +1,138 @@
 #include <stdio.h>
-#include <limits.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <errno.h>
 
 #include "arquivo.h"
 
-int salvarMovimentacao(
-    Movimentacao movimentacao
-) {
+int salvarMovimentacao(Movimentacao movimentacao) {
     FILE *arquivo = fopen("data/movimentacao.dat", "ab");
 
     if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo!\n");
-        return 0;
-    }
-    
-    size_t gravados = fwrite(
-        &movimentacao,
-        sizeof(movimentacao),
-        1,
-        arquivo
-    );
-
-    if (gravados != 1) {
-        printf("Erro em salvar a movimentação!\n");
-        fclose(arquivo);
-        return 0;
-    }
-    
-    if(fclose(arquivo) == EOF) {
-        printf("Erro ao fechar o arquivo!\n");
+        perror("Erro ao abrir histórico");
         return 0;
     }
 
-    return 1;
+    int sucesso = fwrite(&movimentacao, sizeof(Movimentacao), 1, arquivo) == 1;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso)
+        printf("Erro ao salvar movimentação!\n");
+
+    return sucesso;
 }
 
-void listarMovimentacoes(
-    void
-) {
+void listarMovimentacoes(void) {
     FILE *arquivo = fopen("data/movimentacao.dat", "rb");
 
     if (arquivo == NULL) {
-        if (errno == ENOENT) {
+        if (errno == ENOENT)
             printf("Nenhuma movimentação registrada!\n");
-        } else {
-            perror("Erro ao abrir o historico");
-        }
+        else
+            perror("Erro ao abrir histórico");
         return;
     }
 
-    Movimentacao movimentacao;
-    size_t lidos = fread(
-        &movimentacao,
-        sizeof(movimentacao),
-        1,
-        arquivo
-    );
-    int totalMovimentacoes = 0;
+    Movimentacao m;
+    int total = 0;
 
-    while (lidos == 1) {
-        printf(
-            "Código: %d\nTipo: %s\nQuantidade: %d\nData: %s\n\n",
-            movimentacao.codigoProduto,
-            movimentacao.tipo,
-            movimentacao.quantidade,
-            movimentacao.dataHora
-        );
-
-        lidos = fread(
-            &movimentacao,
-            sizeof(movimentacao),
-            1,
-            arquivo
-        );
-        
-        totalMovimentacoes++;
+    while (fread(&m, sizeof(Movimentacao), 1, arquivo) == 1) {
+        printf("Código: %d\nTipo: %s\nQuantidade: %d\nData: %s\n\n",
+            m.codigoProduto, m.tipo, m.quantidade, m.dataHora);
+        total++;
     }
 
-    if (totalMovimentacoes == 0) {
+    if (ferror(arquivo))
+        printf("Erro ao ler histórico!\n");
+    else if (total == 0)
         printf("Nenhuma movimentação registrada!\n");
-    }
-    
-    if (ferror(arquivo)) {
-        printf("Erro ao ler o histórico!\n");
-    }
-    
+
     fclose(arquivo);
 }
 
-
-int salvarProdutos(
-    Produto produtos[],
-    int quantidadeProdutos
-) {
+int salvarProdutos(Produto produtos[], int quantidadeProdutos) {
     FILE *arquivo = fopen("data/produtos.tmp", "wb");
 
     if (arquivo == NULL) {
-        perror("Erro ao abrir arquivo temporário");
+        perror("Erro ao criar arquivo temporário");
         return 0;
     }
 
-    size_t gravados = fwrite(
-        produtos,
-        sizeof(Produto),
-        quantidadeProdutos,
-        arquivo
-    );
+    int sucesso = fwrite(produtos, sizeof(Produto), quantidadeProdutos, arquivo)
+                == (size_t)quantidadeProdutos;
 
-    if (gravados != (size_t) quantidadeProdutos) {
-        printf("Erro ao salvar os produtos!\n");
-        fclose(arquivo);
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (sucesso)
+        sucesso = rename("data/produtos.tmp", "data/produtos.dat") == 0;
+
+    if (!sucesso) {
+        printf("Erro ao salvar produtos!\n");
         remove("data/produtos.tmp");
-        return 0;
     }
 
-    if (fclose(arquivo) == EOF) {
-        printf("Erro ao fechar o arquivo!\n");
-        remove("data/produtos.tmp");
-        return 0;
-    }
-
-    if (rename("data/produtos.tmp", "data/produtos.dat") != 0) {
-        perror("Erro ao substituir arquivo de produtos");
-        remove("data/produtos.tmp");
-        return 0;
-    }
-
-    return 1;
+    return sucesso;
 }
 
-
-int carregarProdutos(
-    Produto **produtos,
-    int *quantidadeProdutos,
-    int *capacidade
-) {
+int carregarProdutos(Produto **produtos, int *total, int *capacidade) {
     FILE *arquivo = fopen("data/produtos.dat", "rb");
 
     if (arquivo == NULL) {
-        if (errno == ENOENT) {
-            return 1;
-        }
-        
-        perror("Erro ao abrir arquivo de produtos");
+        if (errno == ENOENT) return 1;
+        perror("Erro ao abrir produtos");
         return 0;
     }
-    
+
     if (fseek(arquivo, 0, SEEK_END) != 0) {
-        printf("Erro ao acessar o final do arquivo!\n");
         fclose(arquivo);
         return 0;
     }
 
-    long tamanhoArquivo = ftell(arquivo);
+    long tamanho = ftell(arquivo);
 
-    if (tamanhoArquivo == -1L) {
-        printf("Erro ao obter o tamanho do arquivo!\n");
+    if (tamanho < 0 || (size_t)tamanho % sizeof(Produto) != 0) {
+        printf("Arquivo de produtos inválido!\n");
         fclose(arquivo);
         return 0;
     }
 
-    if ((size_t)tamanhoArquivo % sizeof(Produto) != 0) {
-        printf("Erro: arquivo de produtos inválido!\n");
-        fclose(arquivo);
-        return 0;
-    }
-    
-    size_t totalProdutos = (size_t)tamanhoArquivo / sizeof(Produto);
+    size_t quantidade = (size_t)tamanho / sizeof(Produto);
 
-    if (totalProdutos > INT_MAX) {
-        printf("Erro: quantidade de produtos excede o limite!\n");
+    if (quantidade > INT_MAX) {
+        printf("Limite de produtos excedido!\n");
         fclose(arquivo);
         return 0;
     }
-    
-    if (totalProdutos > (size_t)*capacidade) {
-        Produto *temp = realloc(
-            *produtos,
-            totalProdutos * sizeof(Produto)
-        );
+
+    if (quantidade > (size_t)*capacidade) {
+        Produto *temp = realloc(*produtos, quantidade * sizeof(Produto));
 
         if (temp == NULL) {
-            printf("Erro ao relocar memoria!\n");
+            printf("Erro ao realocar memória!\n");
             fclose(arquivo);
             return 0;
         }
-        
+
         *produtos = temp;
-        *capacidade = (int) totalProdutos;
+        *capacidade = (int)quantidade;
     }
 
     rewind(arquivo);
-    
-    size_t lidos = fread(
-        *produtos,
-        sizeof(Produto),
-        totalProdutos,
-        arquivo
-    );
 
-    if (lidos != totalProdutos) {
-        printf("Erro ao carregar os produtos!\n");
-        fclose(arquivo);
-        return 0;
-    }
-    
-    *quantidadeProdutos = (int) totalProdutos;
+    int sucesso = fread(*produtos, sizeof(Produto), quantidade, arquivo)
+                == quantidade;
 
-    if (fclose(arquivo) == EOF) {
-        printf("Erro ao fechar o arquivo!\n");
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso) {
+        printf("Erro ao carregar produtos!\n");
         return 0;
     }
 
+    *total = (int)quantidade;
     return 1;
 }
