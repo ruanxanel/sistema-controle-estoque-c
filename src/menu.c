@@ -19,39 +19,49 @@ static void pausarTela(void) {
     while ((c = getchar()) != '\n' && c != EOF) {}
 }
 
+
 static void exibirMenu(int perfil) {
     limparTela();
 
+    printf(COR_AZUL);
+    printf("============================================\n");
+
+    if (perfil == 0)
+        printf("         SISTEMA DE CONTROLE DE ESTOQUE\n");
+    else if (perfil == 1)
+        printf("             PAINEL ADMINISTRADOR\n");
+    else
+        printf("                PAINEL USUÁRIO\n");
+
+    printf("============================================\n");
+    printf(COR_RESET);
+
     if (perfil == 0) {
-        printf(COR_AZUL "\n====== SISTEMA DE CONTROLE DE ESTOQUE ======\n\n" COR_RESET);
-        printf("1 - Administrador\n2 - Usuário\n0 - Sair\n");
+        printf("\n[1] Administrador\n");
+        printf("[2] Usuário\n");
+        printf("[0] Sair\n");
+    } else if (perfil == 1) {
+        printf("\n[1] Cadastrar produto\n");
+        printf("[2] Listar produtos\n");
+        printf("[3] Buscar produto\n");
+        printf("[4] Editar produto\n");
+        printf("[5] Excluir produto\n");
+        printf("\n[6] Registrar entrada\n");
+        printf("[7] Registrar saída\n");
+        printf("[8] Produtos com estoque baixo\n");
+        printf("[9] Histórico de movimentações\n");
+        printf("\n[0] Voltar ao menu principal\n");
     } else {
-        printf(COR_AZUL "\n========== PAINEL %s ==========\n" COR_RESET,
-            perfil == 1 ? "ADMINISTRADOR" : "USUÁRIO");
-
-        if (perfil == 1) {
-            printf("1 - Cadastrar produto\n");
-            printf("2 - Listar produtos\n");
-            printf("3 - Buscar produto\n");
-            printf("4 - Editar produto\n");
-            printf("5 - Excluir produto\n");
-            printf("6 - Registrar entrada\n");
-            printf("7 - Registrar saída\n");
-            printf("8 - Produtos com estoque baixo\n");
-            printf("9 - Histórico de movimentações\n");
-        } else {
-            printf("1 - Listar produtos\n");
-            printf("2 - Buscar produto\n");
-            printf("3 - Registrar entrada\n");
-            printf("4 - Registrar saída\n");
-            printf("5 - Produtos com estoque baixo\n");
-            printf("6 - Histórico de movimentações\n");
-        }
-
-        printf("0 - Voltar ao menu principal\n");
+        printf("\n[1] Listar produtos\n");
+        printf("[2] Buscar produto\n");
+        printf("[3] Registrar entrada\n");
+        printf("[4] Registrar saída\n");
+        printf("[5] Produtos com estoque baixo\n");
+        printf("[6] Histórico de movimentações\n");
+        printf("\n[0] Voltar ao menu principal\n");
     }
 
-    printf("\n");
+    printf("\n--------------------------------------------\n");
 }
 
 static void executarOpcao(
