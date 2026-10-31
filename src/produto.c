@@ -75,12 +75,24 @@ void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
 
 void listarProdutos(Produto produtos[], int total) {
     if (total == 0) {
-        printf("Nenhum produto cadastrado!\n");
+        printf(COR_AMARELO "Nenhum produto cadastrado!\n" COR_RESET);
         return;
     }
 
-    printf("\n========== PRODUTOS CADASTRADOS ==========\n");
-    for (int i = 0; i < total; i++) exibirProduto(produtos[i]);
+    printf(COR_AZUL "\n=================== PRODUTOS CADASTRADOS ===================\n" COR_RESET);
+    printf("%-8s %-20s %10s %8s %8s\n",
+        "Código", "Produto", "Preço", "Qtd.", "Mín.");
+    printf("------------------------------------------------------------\n");
+
+    for (int i = 0; i < total; i++) {
+        Produto p = produtos[i];
+
+        printf("%-8d %-20.20s %10.2f %8d %8d\n",
+            p.codigo, p.nome, p.preco, p.quantidade, p.estoqueMinimo);
+    }
+
+    printf("------------------------------------------------------------\n");
+    printf("Total de produtos: %d\n", total);
 }
 
 void buscarProduto(Produto produtos[], int total) {
