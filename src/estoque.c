@@ -73,21 +73,28 @@ void registrarSaida(Produto produtos[], int quantidadeProdutos) {
     movimentarEstoque(produtos, quantidadeProdutos, 0);
 }
 
-void listarEstoqueBaixo(Produto produtos[], int quantidadeProdutos) {
-    int encontrou = 0;
+void listarEstoqueBaixo(Produto produtos[], int total) {
+    int encontrados = 0;
 
-    for (int i = 0; i < quantidadeProdutos; i++) {
-        if (produtos[i].quantidade < produtos[i].estoqueMinimo) {
-            printf(COR_AMARELO
-                    "Produto: %s | Atual: %d | Mínimo: %d\n"
-                    COR_RESET,
-                    produtos[i].nome,
-                    produtos[i].quantidade,
-                    produtos[i].estoqueMinimo);
-            encontrou = 1;
+    printf(COR_AZUL "\n================ PRODUTOS COM ESTOQUE BAIXO ================\n" COR_RESET);
+    printf("%-8s %-20s %10s %10s\n",
+        "Código", "Produto", "Atual", "Mínimo");
+    printf("------------------------------------------------------------\n");
+
+    for (int i = 0; i < total; i++) {
+        Produto p = produtos[i];
+
+        if (p.quantidade < p.estoqueMinimo) {
+            printf(COR_AMARELO "%-8d %-20.20s %10d %10d\n" COR_RESET,
+                p.codigo, p.nome, p.quantidade, p.estoqueMinimo);
+            encontrados++;
         }
     }
 
-    if (!encontrou)
+    printf("------------------------------------------------------------\n");
+
+    if (encontrados == 0)
         printf(COR_VERDE "Nenhum produto com estoque baixo!\n" COR_RESET);
+    else
+        printf("Total de produtos com estoque baixo: %d\n", encontrados);
 }
