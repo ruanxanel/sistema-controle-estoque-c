@@ -162,7 +162,7 @@ void editarProduto(Produto produtos[],int quantidadeProdutos) {
     double novoPreco;
     int novoEstoqueMinimo;
 
-    if (lerInteiro("Digite o codigo do produto que deseja editar: \n", &codigoBuscador) != 1) {
+    if (lerInteiro("Digite o codigo do produto que deseja editar: ", &codigoBuscador) != 1) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
@@ -183,7 +183,7 @@ void editarProduto(Produto produtos[],int quantidadeProdutos) {
 
         printf("\n====================================\n");
         printf("   EDITAR PRODUTO\n");
-        printf("====================================\n\n");
+        printf("====================================\n");
         
         exibirProduto(produtos[indice]);
 
