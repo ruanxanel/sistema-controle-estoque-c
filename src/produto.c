@@ -7,320 +7,197 @@
 #include "entrada.h"
 #include "cores.h"
 
-static void exibirProduto(Produto produto) {
+static void exibirProduto(Produto p) {
     printf("\n--------------------------------------\n");
-    printf("Codigo: %d\n", produto.codigo);
-    printf("Nome: %s\n", produto.nome);
-    printf("Preço: R$ %.2f\n", produto.preco);
-    printf("Quantidade: %d\n", produto.quantidade);
-    printf("Estoque minimo: %d\n", produto.estoqueMinimo);
+    printf("Código: %d\nNome: %s\nPreço: R$ %.2f\nQuantidade: %d\nEstoque mínimo: %d\n",
+            p.codigo, p.nome, p.preco, p.quantidade, p.estoqueMinimo);
     printf("--------------------------------------\n");
 }
+static int lerPrecoValido(double *preco) {
+    if (lerDouble("Digite o preço: ", preco) != 1 || *preco < 0) {
+        printf(COR_VERMELHO "Preço inválido!\n" COR_RESET);
+        return 0;
+    }
+    return 1;
+}
 
-void cadastrarProduto(
-    Produto **produtos,
-    int *quantidadeProdutos,
-    int *capacidade
-) {
-    Produto produto;
-    
-    if (lerInteiro("Digite o codigo do produto: ", &produto.codigo) != 1) {
+int localizarProdutoPorCodigo(Produto produtos[], int total, int codigo) {
+    for (int i = 0; i < total; i++) {
+        if (produtos[i].codigo == codigo) return i;
+    }
+    return -1;
+}
+
+void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
+    Produto p;
+
+    if (lerInteiro("Código: ", &p.codigo) != 1 || p.codigo <= 0) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
-    
-    if (produto.codigo <= 0) {
-        printf(COR_VERMELHO "O código deve ser maior que zero!\n" COR_RESET);
-        return;
-    }
-    
-    if (localizarProdutoPorCodigo(
-        *produtos, *quantidadeProdutos, produto.codigo
-    ) != -1) {
-        printf(COR_VERMELHO "Produto ja cadastrado!\n" COR_RESET);
+
+    if (localizarProdutoPorCodigo(*produtos, *total, p.codigo) != -1) {
+        printf(COR_VERMELHO "Produto já cadastrado!\n" COR_RESET);
         return;
     }
 
-    if (lerTexto("Digite o nome do produto: ", 
-                produto.nome,
-                sizeof(produto.nome)) != 1) {
-        printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
-        return;
-    }
-    
-    if (lerDouble("Digite o preço: ", &produto.preco) != 1) {
-        printf(COR_VERMELHO "Preço inválido!\n" COR_RESET);
-        return;
-    }
-    
-    if (produto.preco < 0) {
-        printf(COR_VERMELHO "O preço não pode ser negativo!\n" COR_RESET);
-        return;
-    }
-    
-    if (lerInteiro("Digite a quantidade: ", &produto.quantidade) != 1) {
-        printf(COR_VERMELHO "Quantidade inválida!\n" COR_RESET);
-        return;
-    }
-    
-    if (produto.quantidade < 0) {
-        printf(COR_VERMELHO "A quantidade não pode ser negativa!\n" COR_RESET);
+    if (lerTexto("Nome: ", p.nome, sizeof(p.nome)) != 1 ||
+        !lerPrecoValido(&p.preco) ||
+        lerInteiro("Quantidade: ", &p.quantidade) != 1 ||
+        p.quantidade < 0 ||
+        lerInteiro("Estoque mínimo: ", &p.estoqueMinimo) != 1 ||
+        p.estoqueMinimo < 0) {
+        printf(COR_VERMELHO "Dados inválidos!\n" COR_RESET);
         return;
     }
 
-    if (lerInteiro("Digite o estoque mínimo: ", &produto.estoqueMinimo) != 1) {
-        printf(COR_VERMELHO "Estoque mínimo inválido!\n" COR_RESET);
-        return;
-    }
-    
-    if (produto.estoqueMinimo < 0) {
-        printf(COR_VERMELHO "O estoque mínimo não pode ser negativo!\n" COR_RESET);
-        return;
-    }
-    
-    if (*quantidadeProdutos == *capacidade) {
+    if (*total == *capacidade) {
         if (*capacidade > INT_MAX / 2) {
             printf(COR_VERMELHO "Limite de produtos atingido!\n" COR_RESET);
             return;
         }
-        
-        int novaCapacidade = *capacidade * 2;
 
-        Produto *temp = realloc(
-            *produtos,
-            (size_t) novaCapacidade * sizeof(Produto)
-        );
+        int novaCapacidade = *capacidade * 2;
+        Produto *temp = realloc(*produtos, (size_t)novaCapacidade * sizeof(Produto));
 
         if (temp == NULL) {
-            printf(COR_VERMELHO "Erro ao realocar memoria!\n" COR_RESET);
+            printf(COR_VERMELHO "Erro ao alocar memória!\n" COR_RESET);
             return;
         }
-        
+
         *produtos = temp;
         *capacidade = novaCapacidade;
     }
-    
-    (*produtos)[*quantidadeProdutos] = produto;
-    (*quantidadeProdutos)++;
 
-    printf(COR_VERDE "Produto %s cadastrado com sucesso!\n" COR_RESET,
-        produto.nome);
+    (*produtos)[(*total)++] = p;
+    printf(COR_VERDE "Produto %s cadastrado com sucesso!\n" COR_RESET, p.nome);
 }
 
-
-void listarProdutos(Produto produtos[], int quantidadeProdutos) {
-    if (quantidadeProdutos == 0) {
-        printf(COR_VERMELHO "Nenhum produto cadastrado!\n" COR_RESET);
+void listarProdutos(Produto produtos[], int total) {
+    if (total == 0) {
+        printf("Nenhum produto cadastrado!\n");
         return;
     }
+
     printf("\n========== PRODUTOS CADASTRADOS ==========\n");
-    for (int i = 0; i < quantidadeProdutos; i++) {
-        exibirProduto(produtos[i]);
-    }
+    for (int i = 0; i < total; i++) exibirProduto(produtos[i]);
 }
 
+void buscarProduto(Produto produtos[], int total) {
+    int codigo;
 
-int localizarProdutoPorCodigo(
-    Produto produtos[],
-    int quantidadeProdutos,
-    int codigo
-) {
-    for (int i = 0; i < quantidadeProdutos; i++) {
-        if (produtos[i].codigo == codigo) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-void buscarProduto(Produto produtos[], int quantidadeProdutos) {
-    int codigoBuscador;
-    
-    if (lerInteiro("Digite o codigo do produto: ", &codigoBuscador) != 1) {
+    if (lerInteiro("Código do produto: ", &codigo) != 1) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
 
-    int indice = localizarProdutoPorCodigo(
-        produtos, quantidadeProdutos, codigoBuscador
-    );
+    int indice = localizarProdutoPorCodigo(produtos, total, codigo);
+
+    if (indice == -1)
+        printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
+    else
+        exibirProduto(produtos[indice]);
+}
+
+void editarProduto(Produto produtos[], int total) {
+    int codigo, opcao = -1, minimo;
+    char nome[100];
+    double preco;
+
+    printf("\n========== EDITAR PRODUTO ==========\n");
+
+    if (lerInteiro("Código do produto: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarProdutoPorCodigo(produtos, total, codigo);
 
     if (indice == -1) {
         printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
         return;
     }
 
-    exibirProduto(produtos[indice]);
-}
-
-
-void editarProduto(Produto produtos[],int quantidadeProdutos) {
-    int codigoBuscador;
-    char novoNome[100];
-    double novoPreco;
-    int novoEstoqueMinimo;
-
-    if (lerInteiro("Digite o codigo do produto que deseja editar: ", &codigoBuscador) != 1) {
-        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
-        return;
-    }
-    
-
-    int indice = localizarProdutoPorCodigo(
-        produtos, quantidadeProdutos, codigoBuscador
-    );
-
-    if (indice == -1) {
-        printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
-        return;
-    }
-
-    int opcao = -1;
+    Produto *p = &produtos[indice];
 
     do {
+        printf("\n========== OPÇÕES DE EDIÇÃO ==========\n");
+        exibirProduto(*p);
+        printf("\n1 - Alterar nome\n2 - Alterar preço\n");
+        printf("3 - Alterar estoque mínimo\n4 - Alterar todos os dados\n0 - Voltar\n");
 
-        printf("\n====================================\n");
-        printf("   EDITAR PRODUTO\n");
-        printf("====================================\n");
-        
-        exibirProduto(produtos[indice]);
+        int resultado = lerInteiro("Opção: ", &opcao);
+        if (resultado == 0) continue;
+        if (resultado == -1) return;
 
-        printf("\n1 - Alterar nome\n");
-        printf("2 - Alterar preço\n");
-        printf("3 - Alterar estoque mínimo\n");
-        printf("4 - Alterar todos os dados\n");
-        printf("0 - Voltar\n\n");
-
-        int resultado = lerInteiro("Escolha uma opção: ", &opcao);
-
-        if (resultado == 0) {
-            continue;
-        }
-
-        if (resultado == -1) {
-            return;
-        }
-        
         switch (opcao) {
             case 1:
-                if (lerTexto(
-                    "Digite o novo nome: ", 
-                    novoNome, 
-                    sizeof(novoNome)
-                ) != 1) {
+                if (lerTexto("Novo nome: ", nome, sizeof(nome)) == 1) {
+                    strcpy(p->nome, nome);
+                    printf(COR_VERDE "Nome atualizado!\n" COR_RESET);
+                } else {
                     printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
-                    break;
                 }
-                
-                strcpy(produtos[indice].nome, novoNome);
-                printf(COR_VERDE "Nome atualizado com sucesso!\n" COR_RESET);
                 break;
+
             case 2:
-                if (lerDouble("Digite o novo preço: ", &novoPreco) != 1) {
-                    printf(COR_VERMELHO "Preço inválido!\n" COR_RESET);
-                    break;
+                if (lerPrecoValido(&preco)) {
+                    p->preco = preco;
+                    printf(COR_VERDE "Preço atualizado!\n" COR_RESET);
                 }
-
-                if (novoPreco < 0) {
-                    printf(COR_VERMELHO "O preço não pode ser negativo!\n" COR_RESET);
-                    break;
-                }
-                
-                produtos[indice].preco = novoPreco;
-                printf(COR_VERDE "Preço atualizado com sucesso!\n" COR_RESET);
                 break;
+
             case 3:
-                if (lerInteiro(
-                    "Digite o novo estoque mínimo: ",
-                    &novoEstoqueMinimo
-                ) != 1) {
+                if (lerInteiro("Novo estoque mínimo: ", &minimo) == 1 && minimo >= 0) {
+                    p->estoqueMinimo = minimo;
+                    printf(COR_VERDE "Estoque mínimo atualizado!\n" COR_RESET);
+                } else {
                     printf(COR_VERMELHO "Estoque mínimo inválido!\n" COR_RESET);
-                    break;
                 }
-
-                if (novoEstoqueMinimo < 0) {
-                    printf(COR_VERMELHO "O estoque mínimo não pode ser negativo!\n" COR_RESET);
-                    break;
-                }
-                
-                produtos[indice].estoqueMinimo = novoEstoqueMinimo;
-                printf(COR_VERDE "Estoque mínimo atualizado com sucesso!\n" COR_RESET);
                 break;
+
             case 4:
-                if (lerTexto(
-                    "Digite o novo nome: ", 
-                    novoNome, 
-                    sizeof(novoNome)
-                ) != 1) {
-                    printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
-                    break;
-                }
-                
-                if (lerDouble("Digite o novo preço: ", &novoPreco) != 1) {
-                    printf(COR_VERMELHO "Preço inválido!\n" COR_RESET);
+                if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1 ||
+                    !lerPrecoValido(&preco) ||
+                    lerInteiro("Novo estoque mínimo: ", &minimo) != 1 ||
+                    minimo < 0) {
+                    printf(COR_VERMELHO "Dados inválidos!\n" COR_RESET);
                     break;
                 }
 
-                if (novoPreco < 0) {
-                    printf(COR_VERMELHO "O preço não pode ser negativo!\n" COR_RESET);
-                    break;
-                }
-
-                if (lerInteiro(
-                    "Digite o novo estoque mínimo: ",
-                    &novoEstoqueMinimo
-                ) != 1) {
-                    printf(COR_VERMELHO "Estoque mínimo inválido!\n" COR_RESET);
-                    break;
-                }
-
-                if (novoEstoqueMinimo < 0) {
-                    printf(COR_VERMELHO "O estoque mínimo não pode ser negativo!\n" COR_RESET);
-                    break;
-                }
-
-                strcpy(produtos[indice].nome, novoNome);
-                produtos[indice].preco = novoPreco;
-                produtos[indice].estoqueMinimo = novoEstoqueMinimo;
-                printf(COR_VERDE "Dados atualizados com sucesso!\n" COR_RESET);
-
+                strcpy(p->nome, nome);
+                p->preco = preco;
+                p->estoqueMinimo = minimo;
+                printf(COR_VERDE "Dados atualizados!\n" COR_RESET);
                 break;
+
             case 0:
-                printf(COR_VERDE "Voltando ao menu Administrador...\n" COR_RESET);
                 break;
+
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
-                break;
-            }
+        }
     } while (opcao != 0);
-    
 }
 
+void excluirProduto(Produto produtos[], int *total) {
+    int codigo;
 
-void excluirProduto(Produto produtos[], int *quantidadeProdutos) {
-    int codigoBuscador;
-
-    if (lerInteiro("Digite o código do produto: ", &codigoBuscador) != 1) {
+    if (lerInteiro("Código do produto: ", &codigo) != 1) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
         return;
     }
-    
-    int indice = localizarProdutoPorCodigo(
-        produtos, *quantidadeProdutos, codigoBuscador
-    );
+
+    int indice = localizarProdutoPorCodigo(produtos, *total, codigo);
 
     if (indice == -1) {
         printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
         return;
     }
 
-    for (int i = indice; i < *quantidadeProdutos - 1; i++) {
+    for (int i = indice; i < *total - 1; i++)
         produtos[i] = produtos[i + 1];
-    }
 
-    (*quantidadeProdutos)--;
-
-    printf(COR_VERDE "Produto excluido com sucesso!\n" COR_RESET);
+    (*total)--;
+    printf(COR_VERDE "Produto excluído com sucesso!\n" COR_RESET);
 }
