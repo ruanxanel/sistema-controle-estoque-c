@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
+#include <string.h>
 
 #include "arquivo.h"
+#include "cores.h"
 
 int salvarMovimentacao(Movimentacao movimentacao) {
     FILE *arquivo = fopen("data/movimentacao.dat", "ab");
@@ -29,7 +31,7 @@ void listarMovimentacoes(void) {
 
     if (arquivo == NULL) {
         if (errno == ENOENT)
-            printf("Nenhuma movimentação registrada!\n");
+            printf(COR_AMARELO "Nenhuma movimentação registrada!\n" COR_RESET);
         else
             perror("Erro ao abrir histórico");
         return;
@@ -38,16 +40,27 @@ void listarMovimentacoes(void) {
     Movimentacao m;
     int total = 0;
 
+    printf(COR_AZUL "\n================ HISTÓRICO DE MOVIMENTAÇÕES ================\n" COR_RESET);
+    printf("%-10s %-12s %-12s %-20s\n",
+        "Código", "Tipo", "Quantidade", "Data e hora");
+    printf("-----------------------------------------------------------\n");
+
     while (fread(&m, sizeof(Movimentacao), 1, arquivo) == 1) {
-        printf("Código: %d\nTipo: %s\nQuantidade: %d\nData: %s\n\n",
-            m.codigoProduto, m.tipo, m.quantidade, m.dataHora);
+        const char *cor = strcmp(m.tipo, "ENTRADA") == 0
+                        ? COR_VERDE : COR_VERMELHO;
+
+        printf("%-10d %s%-12s%s %-12d %-20s\n",
+            m.codigoProduto, cor, m.tipo, COR_RESET,
+            m.quantidade, m.dataHora);
         total++;
     }
 
+    printf("-----------------------------------------------------------\n");
+
     if (ferror(arquivo))
-        printf("Erro ao ler histórico!\n");
-    else if (total == 0)
-        printf("Nenhuma movimentação registrada!\n");
+        printf(COR_VERMELHO "Erro ao ler histórico!\n" COR_RESET);
+    else
+        printf("Total de movimentações: %d\n", total);
 
     fclose(arquivo);
 }
