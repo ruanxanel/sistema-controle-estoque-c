@@ -1,4 +1,4 @@
-#ifdef VENDEDOR_H
+#ifndef VENDEDOR_H
 #define VENDEDOR_H
 
 typedef struct {
@@ -6,5 +6,11 @@ typedef struct {
     char nome[100];
     double percentualComissao;
 } Vendedor;
+
+void cadastrarVendedor(Vendedor **vendedores, int *total, int *capacidade);
+
+void listarVendedores(Vendedor vendedores[], int total);
+
+int localizarVendedorPorCodigo(Vendedor vendedores[], int total, int codigo);
 
 #endif
