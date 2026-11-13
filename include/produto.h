@@ -4,14 +4,15 @@
 typedef struct produto {
     int codigo;
     char nome[100];
+    char categoria[50];
     double preco;
     int quantidade;
     int estoqueMinimo;
 } Produto;
 
 void cadastrarProduto(
-    Produto **produto,
-    int *quantidadesProdutos,
+    Produto **produtos,
+    int *quantidadeProdutos,
     int *capacidade
 );
 
@@ -40,4 +41,5 @@ void excluirProduto(
     Produto produtos[],
     int *quantidadeProdutos
 );
+
 #endif

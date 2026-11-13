@@ -9,10 +9,11 @@
 
 static void exibirProduto(Produto p) {
     printf("\n--------------------------------------\n");
-    printf("Código: %d\nNome: %s\nPreço: R$ %.2f\nQuantidade: %d\nEstoque mínimo: %d\n",
-            p.codigo, p.nome, p.preco, p.quantidade, p.estoqueMinimo);
+    printf("Código: %d\nNome: %s\nCategoria: %s\nPreço: R$ %.2f\nQuantidade: %d\nEstoque mínimo: %d\n",
+        p.codigo, p.nome, p.categoria, p.preco, p.quantidade, p.estoqueMinimo);
     printf("--------------------------------------\n");
 }
+
 static int lerPrecoValido(double *preco) {
     if (lerDouble("Digite o preço: ", preco) != 1 || *preco < 0) {
         printf(COR_VERMELHO "Preço inválido!\n" COR_RESET);
@@ -23,13 +24,14 @@ static int lerPrecoValido(double *preco) {
 
 int localizarProdutoPorCodigo(Produto produtos[], int total, int codigo) {
     for (int i = 0; i < total; i++) {
-        if (produtos[i].codigo == codigo) return i;
+        if (produtos[i].codigo == codigo)
+            return i;
     }
     return -1;
 }
 
 void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
-    Produto p;
+    Produto p = {0};
 
     if (lerInteiro("Código: ", &p.codigo) != 1 || p.codigo <= 0) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
@@ -42,6 +44,7 @@ void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
     }
 
     if (lerTexto("Nome: ", p.nome, sizeof(p.nome)) != 1 ||
+        lerTexto("Categoria: ", p.categoria, sizeof(p.categoria)) != 1 ||
         !lerPrecoValido(&p.preco) ||
         lerInteiro("Quantidade: ", &p.quantidade) != 1 ||
         p.quantidade < 0 ||
@@ -52,13 +55,16 @@ void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
     }
 
     if (*total == *capacidade) {
-        if (*capacidade > INT_MAX / 2) {
+        if (*capacidade <= 0 || *capacidade > INT_MAX / 2) {
             printf(COR_VERMELHO "Limite de produtos atingido!\n" COR_RESET);
             return;
         }
 
         int novaCapacidade = *capacidade * 2;
-        Produto *temp = realloc(*produtos, (size_t)novaCapacidade * sizeof(Produto));
+        Produto *temp = realloc(
+            *produtos,
+            (size_t)novaCapacidade * sizeof(Produto)
+        );
 
         if (temp == NULL) {
             printf(COR_VERMELHO "Erro ao alocar memória!\n" COR_RESET);
@@ -70,6 +76,7 @@ void cadastrarProduto(Produto **produtos, int *total, int *capacidade) {
     }
 
     (*produtos)[(*total)++] = p;
+
     printf(COR_VERDE "Produto %s cadastrado com sucesso!\n" COR_RESET, p.nome);
 }
 
@@ -79,19 +86,20 @@ void listarProdutos(Produto produtos[], int total) {
         return;
     }
 
-    printf(COR_AZUL "\n=================== PRODUTOS CADASTRADOS ===================\n" COR_RESET);
-    printf("%-8s %-20s %10s %8s %8s\n",
-        "Código", "Produto", "Preço", "Qtd.", "Mín.");
-    printf("------------------------------------------------------------\n");
+    printf(COR_AZUL "\n========================= PRODUTOS CADASTRADOS =========================\n" COR_RESET);
+    printf("%-8s %-18s %-15s %10s %8s %8s\n",
+        "Código", "Produto", "Categoria", "Preço", "Qtd.", "Mín.");
+    printf("------------------------------------------------------------------------\n");
 
     for (int i = 0; i < total; i++) {
         Produto p = produtos[i];
 
-        printf("%-8d %-20.20s %10.2f %8d %8d\n",
-            p.codigo, p.nome, p.preco, p.quantidade, p.estoqueMinimo);
+        printf("%-8d %-18.18s %-15.15s %10.2f %8d %8d\n",
+            p.codigo, p.nome, p.categoria,
+            p.preco, p.quantidade, p.estoqueMinimo);
     }
 
-    printf("------------------------------------------------------------\n");
+    printf("------------------------------------------------------------------------\n");
     printf("Total de produtos: %d\n", total);
 }
 
@@ -113,7 +121,7 @@ void buscarProduto(Produto produtos[], int total) {
 
 void editarProduto(Produto produtos[], int total) {
     int codigo, opcao = -1, minimo;
-    char nome[100];
+    char nome[100], categoria[50];
     double preco;
 
     printf("\n========== EDITAR PRODUTO ==========\n");
@@ -135,41 +143,62 @@ void editarProduto(Produto produtos[], int total) {
     do {
         printf("\n========== OPÇÕES DE EDIÇÃO ==========\n");
         exibirProduto(*p);
-        printf("\n1 - Alterar nome\n2 - Alterar preço\n");
-        printf("3 - Alterar estoque mínimo\n4 - Alterar todos os dados\n0 - Voltar\n");
+
+        printf("\n1 - Alterar nome\n");
+        printf("2 - Alterar categoria\n");
+        printf("3 - Alterar preço\n");
+        printf("4 - Alterar estoque mínimo\n");
+        printf("5 - Alterar todos os dados\n");
+        printf("0 - Voltar\n");
 
         int resultado = lerInteiro("Opção: ", &opcao);
+
         if (resultado == 0) continue;
         if (resultado == -1) return;
 
         switch (opcao) {
             case 1:
-                if (lerTexto("Novo nome: ", nome, sizeof(nome)) == 1) {
-                    strcpy(p->nome, nome);
-                    printf(COR_VERDE "Nome atualizado!\n" COR_RESET);
-                } else {
+                if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1) {
                     printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
+                    break;
                 }
+
+                strcpy(p->nome, nome);
+                printf(COR_VERDE "Nome atualizado!\n" COR_RESET);
                 break;
 
             case 2:
-                if (lerPrecoValido(&preco)) {
-                    p->preco = preco;
-                    printf(COR_VERDE "Preço atualizado!\n" COR_RESET);
+                if (lerTexto("Nova categoria: ", categoria, sizeof(categoria)) != 1) {
+                    printf(COR_VERMELHO "Categoria inválida!\n" COR_RESET);
+                    break;
                 }
+
+                strcpy(p->categoria, categoria);
+                printf(COR_VERDE "Categoria atualizada!\n" COR_RESET);
                 break;
 
             case 3:
-                if (lerInteiro("Novo estoque mínimo: ", &minimo) == 1 && minimo >= 0) {
-                    p->estoqueMinimo = minimo;
-                    printf(COR_VERDE "Estoque mínimo atualizado!\n" COR_RESET);
-                } else {
-                    printf(COR_VERMELHO "Estoque mínimo inválido!\n" COR_RESET);
-                }
+                if (!lerPrecoValido(&preco))
+                    break;
+
+                p->preco = preco;
+                printf(COR_VERDE "Preço atualizado!\n" COR_RESET);
                 break;
 
             case 4:
+                if (lerInteiro("Novo estoque mínimo: ", &minimo) != 1 ||
+                    minimo < 0) {
+                    printf(COR_VERMELHO "Estoque mínimo inválido!\n" COR_RESET);
+                    break;
+                }
+
+                p->estoqueMinimo = minimo;
+                printf(COR_VERDE "Estoque mínimo atualizado!\n" COR_RESET);
+                break;
+
+            case 5:
                 if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1 ||
+                    lerTexto("Nova categoria: ", categoria, sizeof(categoria)) != 1 ||
                     !lerPrecoValido(&preco) ||
                     lerInteiro("Novo estoque mínimo: ", &minimo) != 1 ||
                     minimo < 0) {
@@ -178,8 +207,10 @@ void editarProduto(Produto produtos[], int total) {
                 }
 
                 strcpy(p->nome, nome);
+                strcpy(p->categoria, categoria);
                 p->preco = preco;
                 p->estoqueMinimo = minimo;
+
                 printf(COR_VERDE "Dados atualizados!\n" COR_RESET);
                 break;
 
@@ -189,6 +220,7 @@ void editarProduto(Produto produtos[], int total) {
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         }
+
     } while (opcao != 0);
 }
 
@@ -211,5 +243,6 @@ void excluirProduto(Produto produtos[], int *total) {
         produtos[i] = produtos[i + 1];
 
     (*total)--;
+
     printf(COR_VERDE "Produto excluído com sucesso!\n" COR_RESET);
 }
