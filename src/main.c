@@ -4,20 +4,29 @@
 #include "menu.h"
 #include "entrada.h"
 #include "produto.h"
+#include "vendedor.h"
 #include "arquivo.h"
 #include "cores.h"
 
 int main(void) {
-    int opcao, total = 0, capacidade = 2;
-    Produto *produtos = malloc(capacidade * sizeof(Produto));
+    int opcao;
+    int totalProdutos = 0, capacidadeProdutos = 2;
+    int totalVendedores = 0, capacidadeVendedores = 2;
 
-    if (produtos == NULL) {
+    Produto *produtos = malloc(capacidadeProdutos * sizeof(Produto));
+    Vendedor *vendedores = malloc(capacidadeVendedores * sizeof(Vendedor));
+
+    if (produtos == NULL || vendedores == NULL) {
         printf(COR_VERMELHO "Erro ao alocar memória!\n" COR_RESET);
+        free(produtos);
+        free(vendedores);
         return 1;
     }
 
-    if (!carregarProdutos(&produtos, &total, &capacidade)) {
+    if (!carregarProdutos(&produtos, &totalProdutos, &capacidadeProdutos) ||
+        !carregarVendedores(&vendedores, &totalVendedores, &capacidadeVendedores)) {
         free(produtos);
+        free(vendedores);
         return 1;
     }
 
@@ -29,16 +38,19 @@ int main(void) {
         if (resultado == 0) continue;
         if (resultado == -1) break;
 
-        if (!lerOpcaoPrincipal(opcao, &produtos, &total, &capacidade))
+        if (!lerOpcaoPrincipal(opcao, &produtos, &totalProdutos, &capacidadeProdutos))
             break;
 
     } while (opcao != 0);
 
-    int sucesso = salvarProdutos(produtos, total);
-    free(produtos);
+    int salvouProdutos = salvarProdutos(produtos, totalProdutos);
+    int salvouVendedores = salvarVendedores(vendedores, totalVendedores);
 
-    if (!sucesso) {
-        printf(COR_VERMELHO "Erro ao salvar produtos!\n" COR_RESET);
+    free(produtos);
+    free(vendedores);
+
+    if (!salvouProdutos || !salvouVendedores) {
+        printf(COR_VERMELHO "Erro ao salvar os dados!\n" COR_RESET);
         return 1;
     }
 
