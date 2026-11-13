@@ -38,8 +38,16 @@ int main(void) {
         if (resultado == 0) continue;
         if (resultado == -1) break;
 
-        if (!lerOpcaoPrincipal(opcao, &produtos, &totalProdutos, &capacidadeProdutos))
-            break;
+        if (!lerOpcaoPrincipal(
+            opcao,
+            &produtos,
+            &totalProdutos,
+            &capacidadeProdutos,
+            &vendedores,
+            &totalVendedores,
+            &capacidadeVendedores
+        ))
+        break;
 
     } while (opcao != 0);
 

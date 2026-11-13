@@ -2,14 +2,18 @@
 #define MENU_H
 
 #include "produto.h"
+#include "vendedor.h"
 
 void menuPrincipal(void);
 
 int lerOpcaoPrincipal(
     int opcao,
     Produto **produtos,
-    int *quantidadeProdutos,
-    int *capacidade
+    int *totalProdutos,
+    int *capacidadeProdutos,
+    Vendedor **vendedores,
+    int *totalVendedores,
+    int *capacidadeVendedores
 );
 
 #endif
