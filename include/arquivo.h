@@ -2,6 +2,7 @@
 #define ARQUIVO_H
 
 #include "estoque.h"
+#include "vendedor.h"
 
 int salvarMovimentacao(
     Movimentacao movimentacao
@@ -19,6 +20,14 @@ int salvarProdutos(
 int carregarProdutos(
     Produto **produtos,
     int *quantidadeProdutos,
+    int *capacidade
+);
+
+int salvarVendedores(Vendedor vendedores[], int total);
+
+int carregarVendedores(
+    Vendedor **vendedores,
+    int *total,
     int *capacidade
 );
 

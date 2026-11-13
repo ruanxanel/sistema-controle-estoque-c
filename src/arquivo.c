@@ -149,3 +149,92 @@ int carregarProdutos(Produto **produtos, int *total, int *capacidade) {
     *total = (int)quantidade;
     return 1;
 }
+
+int salvarVendedores(Vendedor vendedores[], int total) {
+    FILE *arquivo = fopen("data/vendedores.tmp", "wb");
+
+    if (arquivo == NULL) {
+        perror("Erro ao abrir arquivo de vendedores");
+        return 0;
+    }
+
+    int sucesso = fwrite(vendedores, sizeof(Vendedor), total, arquivo)
+                == (size_t)total;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (sucesso)
+        sucesso = rename("data/vendedores.tmp", "data/vendedores.dat") == 0;
+
+    if (!sucesso) {
+        printf("Erro ao salvar vendedores!\n");
+        remove("data/vendedores.tmp");
+    }
+
+    return sucesso;
+}
+
+int carregarVendedores(Vendedor **vendedores, int *total, int *capacidade) {
+    FILE *arquivo = fopen("data/vendedores.dat", "rb");
+
+    if (arquivo == NULL) {
+        if (errno == ENOENT) return 1;
+
+        perror("Erro ao abrir arquivo de vendedores");
+        return 0;
+    }
+
+    if (fseek(arquivo, 0, SEEK_END) != 0) {
+        fclose(arquivo);
+        return 0;
+    }
+
+    long tamanho = ftell(arquivo);
+
+    if (tamanho < 0 || (size_t)tamanho % sizeof(Vendedor) != 0) {
+        printf("Arquivo de vendedores inválido!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    size_t quantidade = (size_t)tamanho / sizeof(Vendedor);
+
+    if (quantidade > INT_MAX) {
+        printf("Limite de vendedores excedido!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    if (quantidade > (size_t)*capacidade) {
+        Vendedor *temp = realloc(
+            *vendedores,
+            quantidade * sizeof(Vendedor)
+        );
+
+        if (temp == NULL) {
+            printf("Erro ao realocar memória!\n");
+            fclose(arquivo);
+            return 0;
+        }
+
+        *vendedores = temp;
+        *capacidade = (int)quantidade;
+    }
+
+    rewind(arquivo);
+
+    int sucesso = fread(*vendedores, sizeof(Vendedor), quantidade, arquivo)
+                == quantidade;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso) {
+        printf("Erro ao carregar vendedores!\n");
+        return 0;
+    }
+
+    *total = (int)quantidade;
+    return 1;
+}
