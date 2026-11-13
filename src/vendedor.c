@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 
 #include "vendedor.h"
 #include "entrada.h"
@@ -89,4 +90,106 @@ void cadastrarVendedor(Vendedor **vendedores, int *total, int *capacidade) {
 
     printf(COR_VERDE "Vendedor %s cadastrado com sucesso!\n" COR_RESET,
         v.nome);
+}
+
+void buscarVendedor(Vendedor vendedores[], int total) {
+    int codigo;
+
+    if (lerInteiro("Código do vendedor: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarVendedorPorCodigo(vendedores, total, codigo);
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Vendedor não encontrado!\n" COR_RESET);
+        return;
+    }
+
+    Vendedor v = vendedores[indice];
+
+    printf("\nCódigo: %d\nNome: %s\nComissão: %.2f%%\n",
+        v.codigo, v.nome, v.percentualComissao);
+}
+
+void editarVendedor(Vendedor vendedores[], int total) {
+    int codigo, opcao;
+    char nome[100];
+    double comissao;
+
+    if (lerInteiro("Código do vendedor: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarVendedorPorCodigo(vendedores, total, codigo);
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Vendedor não encontrado!\n" COR_RESET);
+        return;
+    }
+
+    Vendedor *v = &vendedores[indice];
+
+    printf("\n[1] Alterar nome\n");
+    printf("[2] Alterar comissão\n");
+    printf("[3] Alterar ambos\n");
+
+    if (lerInteiro("Escolha uma opção: ", &opcao) != 1) {
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+        return;
+    }
+
+    if (opcao < 1 || opcao > 3) {
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+        return;
+    }
+
+    if (opcao == 1 || opcao == 3) {
+        if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1) {
+            printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
+            return;
+        }
+    }
+
+    if (opcao == 2 || opcao == 3) {
+        if (lerDouble("Nova comissão (%): ", &comissao) != 1 ||
+            comissao < 0 || comissao > 100) {
+            printf(COR_VERMELHO "Comissão inválida!\n" COR_RESET);
+            return;
+        }
+    }
+
+    if (opcao == 1 || opcao == 3)
+        strcpy(v->nome, nome);
+
+    if (opcao == 2 || opcao == 3)
+        v->percentualComissao = comissao;
+
+    printf(COR_VERDE "Vendedor atualizado com sucesso!\n" COR_RESET);
+}
+
+
+void excluirVendedor(Vendedor vendedores[], int *total) {
+    int codigo;
+
+    if (lerInteiro("Código do vendedor: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarVendedorPorCodigo(vendedores, *total, codigo);
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Vendedor não encontrado!\n" COR_RESET);
+        return;
+    }
+
+    for (int i = indice; i < *total - 1; i++)
+        vendedores[i] = vendedores[i + 1];
+
+    (*total)--;
+
+    printf(COR_VERDE "Vendedor excluído com sucesso!\n" COR_RESET);
 }

@@ -53,6 +53,9 @@ static void exibirMenu(int perfil) {
 
         printf("\n[10] Cadastrar vendedor\n");
         printf("[11] Listar vendedores\n");
+        printf("[12] Buscar vendedor\n");
+        printf("[13] Editar vendedor\n");
+        printf("[14] Excluir vendedor\n");
 
         printf("\n[0] Voltar ao menu principal\n");
     } else {
@@ -112,6 +115,15 @@ static void executarOpcao(
                 break;
             case 11:
                 listarVendedores(*vendedores, *totalVendedores);
+                break;
+            case 12:
+                buscarVendedor(*vendedores, *totalVendedores);
+                break;
+            case 13:
+                editarVendedor(*vendedores, *totalVendedores);
+                break;
+            case 14:
+                excluirVendedor(*vendedores, totalVendedores);
                 break;
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
