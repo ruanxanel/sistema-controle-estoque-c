@@ -3,3 +3,7 @@ data/*.dat
 data/*.tmp
 .vscode/
 backup/
+data/*.bak
+data/*.pendente
+data/*.pendente.tmp
+data/*.restaurar.tmp

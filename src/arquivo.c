@@ -3,10 +3,13 @@
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 
 #include "arquivo.h"
 #include "cores.h"
+
+int recuperarCompraPendente(void);
 
 int salvarMovimentacao(Movimentacao movimentacao) {
     FILE *arquivo = fopen("data/movimentacao.dat", "ab");
@@ -92,6 +95,9 @@ int salvarProdutos(Produto produtos[], int quantidadeProdutos) {
 }
 
 int carregarProdutos(Produto **produtos, int *total, int *capacidade) {
+    if (!recuperarCompraPendente())
+        return 0;
+
     FILE *arquivo = fopen("data/produtos.dat", "rb");
 
     if (arquivo == NULL) {
@@ -534,6 +540,237 @@ int registrarVendaArquivo(Venda venda, ItemVenda itens[], int totalItens) {
 
         return 0;
     }
+
+    return 1;
+}
+
+static const char *arquivosCompra[3] = {
+    "data/produtos.dat",
+    "data/vendas.dat",
+    "data/itens_venda.dat"
+};
+
+static const char *copiasCompra[3] = {
+    "data/produtos.compra.bak",
+    "data/vendas.compra.bak",
+    "data/itens_venda.compra.bak"
+};
+
+static int copiarArquivo(const char *origem, const char *destino) {
+    FILE *entrada = fopen(origem, "rb");
+    if (entrada == NULL)
+        return 0;
+
+    FILE *saida = fopen(destino, "wb");
+    if (saida == NULL) {
+        fclose(entrada);
+        return 0;
+    }
+
+    char bloco[4096];
+    size_t lidos;
+    int sucesso = 1;
+
+    while ((lidos = fread(bloco, 1, sizeof(bloco), entrada)) > 0) {
+        if (fwrite(bloco, 1, lidos, saida) != lidos) {
+            sucesso = 0;
+            break;
+        }
+    }
+
+    if (ferror(entrada))
+        sucesso = 0;
+
+    if (fflush(saida) != 0 || fsync(fileno(saida)) != 0)
+        sucesso = 0;
+
+    if (fclose(entrada) == EOF)
+        sucesso = 0;
+
+    if (fclose(saida) == EOF)
+        sucesso = 0;
+
+    if (!sucesso)
+        remove(destino);
+
+    return sucesso;
+}
+
+int recuperarCompraPendente(void) {
+    FILE *controle = fopen("data/compra.pendente", "rb");
+
+    if (controle == NULL) {
+        if (errno == ENOENT)
+            return 1;
+        perror("Erro ao verificar compra pendente");
+        return 0;
+    }
+
+    int existia[3];
+    int valido = fscanf(controle, "%d %d %d", &existia[0], &existia[1], &existia[2]) == 3;
+
+    if (fclose(controle) == EOF)
+        valido = 0;
+
+    for (int i = 0; i < 3 && valido; i++) {
+        if (existia[i] != 0 && existia[i] != 1)
+            valido = 0;
+    }
+
+    if (!valido) {
+        printf(COR_VERMELHO "Controle de recuperação inválido!\n" COR_RESET);
+        return 0;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (existia[i]) {
+            char temporario[128];
+            snprintf(temporario, sizeof(temporario), "%s.restaurar.tmp", arquivosCompra[i]);
+
+            if (!copiarArquivo(copiasCompra[i], temporario) ||
+                rename(temporario, arquivosCompra[i]) != 0) {
+                printf(COR_VERMELHO "Falha ao recuperar %s!\n" COR_RESET, arquivosCompra[i]);
+                return 0;
+            }
+        } else if (remove(arquivosCompra[i]) != 0 && errno != ENOENT) {
+            perror("Erro ao recuperar arquivo inexistente");
+            return 0;
+        }
+    }
+
+    if (remove("data/compra.pendente") != 0) {
+        perror("Erro ao concluir recuperação");
+        return 0;
+    }
+
+    for (int i = 0; i < 3; i++)
+        remove(copiasCompra[i]);
+
+    printf(COR_AMARELO "Compra interrompida recuperada. Nenhuma venda parcial foi mantida.\n" COR_RESET);
+    return 1;
+}
+
+int registrarCompraCompleta(
+    Venda venda,
+    ItemVenda itens[],
+    int totalItens,
+    Produto produtos[],
+    int totalProdutos
+) {
+    if (!recuperarCompraPendente())
+        return 0;
+
+    if (venda.codigo <= 0 || venda.codigoCliente <= 0 ||
+        venda.codigoVendedor <= 0 || itens == NULL || totalItens <= 0 ||
+        produtos == NULL || totalProdutos < 0 ||
+        !isfinite(venda.valorTotal) || venda.valorTotal <= 0 ||
+        !isfinite(venda.comissao) || venda.comissao < 0) {
+        printf(COR_VERMELHO "Dados da compra inválidos!\n" COR_RESET);
+        return 0;
+    }
+
+    int proximo;
+    if (!proximoCodigoVenda(&proximo) || proximo != venda.codigo) {
+        printf(COR_VERMELHO "Código da venda inválido ou desatualizado!\n" COR_RESET);
+        return 0;
+    }
+
+    Produto *atualizados = malloc((size_t)(totalProdutos > 0 ? totalProdutos : 1) * sizeof(Produto));
+    if (atualizados == NULL)
+        return 0;
+
+    memcpy(atualizados, produtos, (size_t)totalProdutos * sizeof(Produto));
+
+    int unidades = 0;
+    double valorCalculado = 0;
+
+    for (int i = 0; i < totalItens; i++) {
+        ItemVenda item = itens[i];
+        int indice = localizarProdutoPorCodigo(atualizados, totalProdutos, item.codigoProduto);
+
+        if (indice < 0 || item.quantidade <= 0 ||
+            !isfinite(item.precoUnitario) || item.precoUnitario < 0 ||
+            unidades > INT_MAX - item.quantidade ||
+            item.quantidade > atualizados[indice].quantidade) {
+            printf(COR_VERMELHO "Produto, quantidade ou preço inválido na compra!\n" COR_RESET);
+            free(atualizados);
+            return 0;
+        }
+
+        unidades += item.quantidade;
+        valorCalculado += item.quantidade * item.precoUnitario;
+        atualizados[indice].quantidade -= item.quantidade;
+    }
+
+    if (!isfinite(valorCalculado) || unidades != venda.quantidadeItens ||
+        fabs(valorCalculado - venda.valorTotal) > 0.005 ||
+        fabs(calcularComissao(unidades, valorCalculado) - venda.comissao) > 0.005) {
+        printf(COR_VERMELHO "Totais da venda inconsistentes!\n" COR_RESET);
+        free(atualizados);
+        return 0;
+    }
+
+    int existia[3] = {0};
+
+    for (int i = 0; i < 3; i++) {
+        FILE *teste = fopen(arquivosCompra[i], "rb");
+
+        if (teste != NULL) {
+            existia[i] = 1;
+            if (fclose(teste) == EOF || !copiarArquivo(arquivosCompra[i], copiasCompra[i])) {
+                printf(COR_VERMELHO "Erro ao preparar cópia de segurança!\n" COR_RESET);
+                free(atualizados);
+                return 0;
+            }
+        } else if (errno != ENOENT) {
+            perror("Erro ao consultar arquivo da compra");
+            free(atualizados);
+            return 0;
+        }
+    }
+
+    FILE *controle = fopen("data/compra.pendente.tmp", "wb");
+    if (controle == NULL) {
+        free(atualizados);
+        return 0;
+    }
+
+    int pronto = fprintf(controle, "%d %d %d\n", existia[0], existia[1], existia[2]) > 0;
+    if (fflush(controle) != 0 || fsync(fileno(controle)) != 0)
+        pronto = 0;
+    if (fclose(controle) == EOF)
+        pronto = 0;
+
+    if (!pronto || rename("data/compra.pendente.tmp", "data/compra.pendente") != 0) {
+        remove("data/compra.pendente.tmp");
+        free(atualizados);
+        return 0;
+    }
+
+    int sucesso = registrarVendaArquivo(venda, itens, totalItens);
+    if (sucesso)
+        sucesso = salvarProdutos(atualizados, totalProdutos);
+
+    if (!sucesso) {
+        printf(COR_VERMELHO "Compra não concluída. Tentando recuperar os arquivos...\n" COR_RESET);
+        if (!recuperarCompraPendente())
+            printf(COR_VERMELHO "Recuperação pendente. Não realize novas operações!\n" COR_RESET);
+        free(atualizados);
+        return 0;
+    }
+
+    if (remove("data/compra.pendente") != 0) {
+        printf(COR_VERMELHO "Erro ao concluir a compra. Tentando recuperar...\n" COR_RESET);
+        recuperarCompraPendente();
+        free(atualizados);
+        return 0;
+    }
+
+    memcpy(produtos, atualizados, (size_t)totalProdutos * sizeof(Produto));
+    free(atualizados);
+
+    for (int i = 0; i < 3; i++)
+        remove(copiasCompra[i]);
 
     return 1;
 }
