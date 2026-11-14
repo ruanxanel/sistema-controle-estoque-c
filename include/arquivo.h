@@ -3,6 +3,7 @@
 
 #include "estoque.h"
 #include "vendedor.h"
+#include "cliente.h"
 
 int salvarMovimentacao(
     Movimentacao movimentacao
@@ -27,6 +28,14 @@ int salvarVendedores(Vendedor vendedores[], int total);
 
 int carregarVendedores(
     Vendedor **vendedores,
+    int *total,
+    int *capacidade
+);
+
+int salvarClientes(Cliente clientes[], int total);
+
+int carregarClientes(
+    Cliente **clientes,
     int *total,
     int *capacidade
 );

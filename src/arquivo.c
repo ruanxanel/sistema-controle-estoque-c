@@ -238,3 +238,92 @@ int carregarVendedores(Vendedor **vendedores, int *total, int *capacidade) {
     *total = (int)quantidade;
     return 1;
 }
+
+int salvarClientes(Cliente clientes[], int total) {
+    FILE *arquivo = fopen("data/clientes.tmp", "wb");
+
+    if (arquivo == NULL) {
+        perror("Erro ao abrir arquivo de clientes");
+        return 0;
+    }
+
+    int sucesso = fwrite(clientes, sizeof(Cliente), total, arquivo)
+                == (size_t)total;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (sucesso)
+        sucesso = rename("data/clientes.tmp", "data/clientes.dat") == 0;
+
+    if (!sucesso) {
+        printf("Erro ao salvar clientes!\n");
+        remove("data/clientes.tmp");
+    }
+
+    return sucesso;
+}
+
+int carregarClientes(Cliente **clientes, int *total, int *capacidade) {
+    FILE *arquivo = fopen("data/clientes.dat", "rb");
+
+    if (arquivo == NULL) {
+        if (errno == ENOENT) return 1;
+
+        perror("Erro ao abrir arquivo de clientes");
+        return 0;
+    }
+
+    if (fseek(arquivo, 0, SEEK_END) != 0) {
+        fclose(arquivo);
+        return 0;
+    }
+
+    long tamanho = ftell(arquivo);
+
+    if (tamanho < 0 || (size_t)tamanho % sizeof(Cliente) != 0) {
+        printf("Arquivo de clientes inválido!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    size_t quantidade = (size_t)tamanho / sizeof(Cliente);
+
+    if (quantidade > INT_MAX) {
+        printf("Limite de clientes excedido!\n");
+        fclose(arquivo);
+        return 0;
+    }
+
+    if (quantidade > (size_t)*capacidade) {
+        Cliente *temp = realloc(
+            *clientes,
+            quantidade * sizeof(Cliente)
+        );
+
+        if (temp == NULL) {
+            printf("Erro ao realocar memória!\n");
+            fclose(arquivo);
+            return 0;
+        }
+
+        *clientes = temp;
+        *capacidade = (int)quantidade;
+    }
+
+    rewind(arquivo);
+
+    int sucesso = fread(*clientes, sizeof(Cliente), quantidade, arquivo)
+                == quantidade;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso) {
+        printf("Erro ao carregar clientes!\n");
+        return 0;
+    }
+
+    *total = (int)quantidade;
+    return 1;
+}
