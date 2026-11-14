@@ -2,6 +2,12 @@
 #define VENDA_H
 
 typedef struct {
+    int codigoProduto;
+    int quantidade;
+    double precoUnitario;
+} ItemVenda;
+
+typedef struct {
     int codigo;
     int codigoVendedor;
     int codigoCliente;
