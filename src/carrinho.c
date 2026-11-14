@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <math.h>
 
 #include "carrinho.h"
 #include "entrada.h"
 #include "produto.h"
+#include "arquivo.h"
+#include "venda.h"
 #include "cores.h"
 
 int inicializarCarrinho(Carrinho *carrinho) {
@@ -78,11 +82,16 @@ void adicionarAoCarrinho(Carrinho *carrinho, Produto produtos[], int totalProdut
         carrinho->itens[indiceCarrinho].quantidade += quantidade;
     } else {
         if (carrinho->total == carrinho->capacidade) {
+            if (carrinho->capacidade > INT_MAX / 2) {
+                printf(COR_VERMELHO "Limite do carrinho atingido!\n" COR_RESET);
+                return;
+            }
+
             int novaCapacidade = carrinho->capacidade * 2;
 
             ItemVenda *temp = realloc(
                 carrinho->itens,
-                novaCapacidade * sizeof(ItemVenda)
+                (size_t)novaCapacidade * sizeof(ItemVenda)
             );
 
             if (temp == NULL) {
@@ -142,7 +151,8 @@ void editarQuantidadeCarrinho(Carrinho *carrinho, Produto produtos[], int totalP
 
     printf("Quantidade atual: %d\n", carrinho->itens[indiceCarrinho].quantidade);
 
-    if (lerInteiro("Nova quantidade: ", &novaQuantidade) != 1 || novaQuantidade <= 0) {
+    if (lerInteiro("Nova quantidade: ", &novaQuantidade) != 1 ||
+        novaQuantidade <= 0) {
         printf(COR_VERMELHO "Quantidade inválida!\n" COR_RESET);
         return;
     }
@@ -261,6 +271,35 @@ void visualizarCarrinho(Carrinho *carrinho, Produto produtos[], int totalProduto
     printf(COR_VERDE "VALOR TOTAL: R$ %.2f\n" COR_RESET, valorTotal);
 }
 
+static int validarEstoqueCarrinho(
+    Carrinho *carrinho,
+    Produto produtos[],
+    int totalProdutos
+) {
+    for (int i = 0; i < carrinho->total; i++) {
+        ItemVenda item = carrinho->itens[i];
+
+        int indice = localizarProdutoPorCodigo(
+            produtos, totalProdutos, item.codigoProduto
+        );
+
+        if (indice == -1) {
+            printf(COR_VERMELHO "Produto %d não encontrado!\n" COR_RESET,
+                item.codigoProduto);
+            return 0;
+        }
+
+        if (item.quantidade <= 0 ||
+            item.quantidade > produtos[indice].quantidade) {
+            printf(COR_VERMELHO "Estoque insuficiente para %s!\n" COR_RESET,
+                produtos[indice].nome);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 int finalizarCompra(
     Carrinho *carrinho,
     Produto produtos[],
@@ -319,7 +358,51 @@ int finalizarCompra(
     printf(COR_VERDE "\nVendedor selecionado: %s\n" COR_RESET,
         vendedores[indiceVendedor].nome);
 
-    printf(COR_AMARELO "\nRegistro da venda ainda não implementado.\n" COR_RESET);
+    if (!validarEstoqueCarrinho(carrinho, produtos, totalProdutos))
+        return 0;
+
+    int totalUnidades = 0;
+    double valorTotal = 0;
+
+    for (int i = 0; i < carrinho->total; i++) {
+        ItemVenda item = carrinho->itens[i];
+
+        if (item.quantidade > INT_MAX - totalUnidades ||
+            !isfinite(item.precoUnitario) ||
+            item.precoUnitario < 0) {
+            printf(COR_VERMELHO "Dados da compra inválidos!\n" COR_RESET);
+            return 0;
+        }
+
+        totalUnidades += item.quantidade;
+        valorTotal += item.quantidade * item.precoUnitario;
+    }
+
+    if (!isfinite(valorTotal) || valorTotal <= 0) {
+        printf(COR_VERMELHO "Valor total inválido!\n" COR_RESET);
+        return 0;
+    }
+
+    double comissao = calcularComissao(totalUnidades, valorTotal);
+
+    printf(COR_AZUL "\n========== RESUMO DA COMPRA ==========\n" COR_RESET);
+    printf("Cliente: %s\n", clientes[indiceCliente].nome);
+    printf("Vendedor: %s\n", vendedores[indiceVendedor].nome);
+    printf("Total de unidades: %d\n", totalUnidades);
+    printf("Valor total: R$ %.2f\n", valorTotal);
+    printf("Comissão do vendedor: R$ %.2f\n", comissao);
+
+    int confirmar;
+
+    if (lerInteiro("\n[1] Confirmar compra  [0] Cancelar: ", &confirmar) != 1 ||
+        confirmar != 1) {
+        printf(COR_AMARELO "Compra não confirmada.\n" COR_RESET);
+        return 0;
+    }
+
+    printf(COR_AMARELO
+        "Confirmação recebida. Registro definitivo ainda não habilitado.\n"
+        COR_RESET);
 
     return 0;
 }
