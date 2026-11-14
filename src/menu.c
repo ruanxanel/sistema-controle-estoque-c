@@ -57,6 +57,10 @@ static void exibirMenu(int perfil) {
         printf("[13] Editar vendedor\n");
         printf("[14] Excluir vendedor\n");
 
+        printf("\n[15] Cadastrar cliente\n");
+        printf("[16] Listar clientes\n");
+        printf("[17] Buscar cliente\n");
+
         printf("\n[0] Voltar ao menu principal\n");
     } else {
         printf("\n[1] Listar produtos\n");
@@ -79,7 +83,10 @@ static void executarOpcao(
     int *capacidadeProdutos,
     Vendedor **vendedores,
     int *totalVendedores,
-    int *capacidadeVendedores
+    int *capacidadeVendedores,
+    Cliente **clientes,
+    int *totalClientes,
+    int *capacidadeClientes
 ) {
     if (perfil == 1) {
         switch (opcao) {
@@ -125,6 +132,17 @@ static void executarOpcao(
             case 14:
                 excluirVendedor(*vendedores, totalVendedores);
                 break;
+            case 15:
+                cadastrarCliente(clientes, totalClientes, capacidadeClientes);
+                break;
+
+            case 16:
+                listarClientes(*clientes, *totalClientes);
+                break;
+
+            case 17:
+                buscarCliente(*clientes, *totalClientes);
+                break;
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         }
@@ -167,7 +185,10 @@ int lerOpcaoPrincipal(
     int *capacidadeProdutos,
     Vendedor **vendedores,
     int *totalVendedores,
-    int *capacidadeVendedores
+    int *capacidadeVendedores,
+    Cliente **clientes,
+    int *totalClientes,
+    int *capacidadeClientes
 ) {
     if (opcao == 0) {
         printf(COR_VERDE "Saindo...\n" COR_RESET);
@@ -198,7 +219,10 @@ int lerOpcaoPrincipal(
             capacidadeProdutos,
             vendedores,
             totalVendedores,
-            capacidadeVendedores
+            capacidadeVendedores,
+            clientes,
+            totalClientes,
+            capacidadeClientes
         );
 
     } while (escolha != 0);

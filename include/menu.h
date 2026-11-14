@@ -3,6 +3,7 @@
 
 #include "produto.h"
 #include "vendedor.h"
+#include "cliente.h"
 
 void menuPrincipal(void);
 
@@ -13,7 +14,10 @@ int lerOpcaoPrincipal(
     int *capacidadeProdutos,
     Vendedor **vendedores,
     int *totalVendedores,
-    int *capacidadeVendedores
+    int *capacidadeVendedores,
+    Cliente **clientes,
+    int *totalClientes,
+    int *capacidadeClientes
 );
 
 #endif

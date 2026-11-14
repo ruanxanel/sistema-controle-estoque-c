@@ -51,7 +51,10 @@ int main(void) {
             &capacidadeProdutos,
             &vendedores,
             &totalVendedores,
-            &capacidadeVendedores
+            &capacidadeVendedores,
+            &clientes,
+            &totalClientes,
+            &capacidadeClientes
         ))
             break;
 
