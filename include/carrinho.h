@@ -29,4 +29,10 @@ void removerDoCarrinho(Carrinho *carrinho);
 
 void limparCarrinho(Carrinho *carrinho);
 
+void visualizarCarrinho(
+    Carrinho *carrinho,
+    Produto produtos[],
+    int totalProdutos
+);
+
 #endif

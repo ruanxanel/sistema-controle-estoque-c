@@ -216,3 +216,47 @@ void limparCarrinho(Carrinho *carrinho) {
         printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
     }
 }
+
+void visualizarCarrinho(Carrinho *carrinho, Produto produtos[], int totalProdutos) {
+    if (carrinho->total == 0) {
+        printf(COR_AMARELO "O carrinho está vazio!\n" COR_RESET);
+        return;
+    }
+
+    double valorTotal = 0;
+    int totalUnidades = 0;
+
+    printf(COR_AZUL "\n=================== MEU CARRINHO ===================\n" COR_RESET);
+    printf("%-8s %-18s %-6s %-10s %-10s\n",
+        "Código", "Produto", "Qtd", "Preço", "Subtotal");
+    printf("----------------------------------------------------\n");
+
+    for (int i = 0; i < carrinho->total; i++) {
+        ItemVenda item = carrinho->itens[i];
+
+        int indice = localizarProdutoPorCodigo(
+            produtos, totalProdutos, item.codigoProduto
+        );
+
+        const char *nome = "Produto indisponível";
+
+        if (indice != -1)
+            nome = produtos[indice].nome;
+
+        double subtotal = item.quantidade * item.precoUnitario;
+
+        printf("%-8d %-18.18s %-6d R$ %-7.2f R$ %.2f\n",
+            item.codigoProduto,
+            nome,
+            item.quantidade,
+            item.precoUnitario,
+            subtotal);
+
+        valorTotal += subtotal;
+        totalUnidades += item.quantidade;
+    }
+
+    printf("----------------------------------------------------\n");
+    printf("Total de unidades: %d\n", totalUnidades);
+    printf(COR_VERDE "VALOR TOTAL: R$ %.2f\n" COR_RESET, valorTotal);
+}
