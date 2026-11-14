@@ -156,3 +156,63 @@ void editarQuantidadeCarrinho(Carrinho *carrinho, Produto produtos[], int totalP
 
     printf(COR_VERDE "Quantidade atualizada com sucesso!\n" COR_RESET);
 }
+
+void removerDoCarrinho(Carrinho *carrinho) {
+    int codigo;
+
+    if (carrinho->total == 0) {
+        printf(COR_AMARELO "O carrinho está vazio!\n" COR_RESET);
+        return;
+    }
+
+    if (lerInteiro("Código do produto: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = -1;
+
+    for (int i = 0; i < carrinho->total; i++) {
+        if (carrinho->itens[i].codigoProduto == codigo) {
+            indice = i;
+            break;
+        }
+    }
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Produto não está no carrinho!\n" COR_RESET);
+        return;
+    }
+
+    for (int i = indice; i < carrinho->total - 1; i++)
+        carrinho->itens[i] = carrinho->itens[i + 1];
+
+    carrinho->total--;
+
+    printf(COR_VERDE "Produto removido do carrinho!\n" COR_RESET);
+}
+
+void limparCarrinho(Carrinho *carrinho) {
+    int confirmar;
+
+    if (carrinho->total == 0) {
+        printf(COR_AMARELO "O carrinho já está vazio!\n" COR_RESET);
+        return;
+    }
+
+    printf(COR_AMARELO "Deseja remover todos os produtos?\n" COR_RESET);
+
+    if (lerInteiro("[1] Sim  [0] Não: ", &confirmar) != 1) {
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+        return;
+    }
+
+    if (confirmar == 1) {
+        carrinho->total = 0;
+        printf(COR_VERDE "Carrinho esvaziado com sucesso!\n" COR_RESET);
+    } else if (confirmar == 0) {
+        printf(COR_AMARELO "Operação cancelada!\n" COR_RESET);
+    } else {
+        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+    }
+}

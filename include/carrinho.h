@@ -24,4 +24,9 @@ void editarQuantidadeCarrinho(
     Produto produtos[],
     int totalProdutos
 );
+
+void removerDoCarrinho(Carrinho *carrinho);
+
+void limparCarrinho(Carrinho *carrinho);
+
 #endif
