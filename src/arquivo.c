@@ -327,3 +327,53 @@ int carregarClientes(Cliente **clientes, int *total, int *capacidade) {
     *total = (int)quantidade;
     return 1;
 }
+
+int salvarVenda(Venda venda) {
+    FILE *arquivo = fopen("data/vendas.dat", "ab");
+
+    if (arquivo == NULL) {
+        perror("Erro ao abrir arquivo de vendas");
+        return 0;
+    }
+
+    int sucesso = fwrite(&venda, sizeof(Venda), 1, arquivo) == 1;
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso)
+        printf(COR_VERMELHO "Erro ao salvar venda!\n" COR_RESET);
+
+    return sucesso;
+}
+
+int salvarItensVenda(int codigoVenda, ItemVenda itens[], int totalItens) {
+    FILE *arquivo = fopen("data/itens_venda.dat", "ab");
+
+    if (arquivo == NULL) {
+        perror("Erro ao abrir arquivo de itens");
+        return 0;
+    }
+
+    int sucesso = 1;
+
+    for (int i = 0; i < totalItens; i++) {
+        ItemVendaRegistrado registro;
+
+        registro.codigoVenda = codigoVenda;
+        registro.item = itens[i];
+
+        if (fwrite(&registro, sizeof(ItemVendaRegistrado), 1, arquivo) != 1) {
+            sucesso = 0;
+            break;
+        }
+    }
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    if (!sucesso)
+        printf(COR_VERMELHO "Erro ao salvar itens da venda!\n" COR_RESET);
+
+    return sucesso;
+}
