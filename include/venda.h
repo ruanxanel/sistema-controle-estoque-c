@@ -1,9 +1,7 @@
 #ifndef VENDA_H
 #define VENDA_H
 
-#include "produto.h"
 #include "vendedor.h"
-#include "cliente.h"
 
 typedef struct {
     int codigoProduto;
