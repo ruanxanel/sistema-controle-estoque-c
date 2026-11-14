@@ -19,4 +19,9 @@ void adicionarAoCarrinho(
     int totalProdutos
 );
 
+void editarQuantidadeCarrinho(
+    Carrinho *carrinho,
+    Produto produtos[],
+    int totalProdutos
+);
 #endif
