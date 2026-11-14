@@ -377,3 +377,37 @@ int salvarItensVenda(int codigoVenda, ItemVenda itens[], int totalItens) {
 
     return sucesso;
 }
+
+int proximoCodigoVenda(int *codigo) {
+    FILE *arquivo = fopen("data/vendas.dat", "rb");
+
+    *codigo = 1;
+
+    if (arquivo == NULL) {
+        if (errno == ENOENT)
+            return 1;
+
+        perror("Erro ao abrir vendas");
+        return 0;
+    }
+
+    Venda venda;
+
+    while (fread(&venda, sizeof(Venda), 1, arquivo) == 1) {
+        if (venda.codigo >= *codigo) {
+            if (venda.codigo == INT_MAX) {
+                fclose(arquivo);
+                return 0;
+            }
+
+            *codigo = venda.codigo + 1;
+        }
+    }
+
+    int sucesso = !ferror(arquivo);
+
+    if (fclose(arquivo) == EOF)
+        sucesso = 0;
+
+    return sucesso;
+}

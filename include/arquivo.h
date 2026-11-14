@@ -55,4 +55,6 @@ int registrarVendaArquivo(
     int totalItens
 );
 
+int proximoCodigoVenda(int *codigo);
+
 #endif
