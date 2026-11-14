@@ -1,3 +1,5 @@
 build/
 data/*.dat
 data/*.tmp
+.vscode/
+backup/
