@@ -260,3 +260,66 @@ void visualizarCarrinho(Carrinho *carrinho, Produto produtos[], int totalProduto
     printf("Total de unidades: %d\n", totalUnidades);
     printf(COR_VERDE "VALOR TOTAL: R$ %.2f\n" COR_RESET, valorTotal);
 }
+
+int finalizarCompra(
+    Carrinho *carrinho,
+    Produto produtos[],
+    int totalProdutos,
+    Vendedor vendedores[],
+    int totalVendedores,
+    Cliente clientes[],
+    int totalClientes
+) {
+    int codigoCliente, codigoVendedor;
+
+    if (carrinho->total == 0) {
+        printf(COR_AMARELO "O carrinho está vazio!\n" COR_RESET);
+        return 0;
+    }
+
+    visualizarCarrinho(carrinho, produtos, totalProdutos);
+
+    if (lerInteiro("Código do cliente: ", &codigoCliente) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return 0;
+    }
+
+    int indiceCliente = localizarClientePorCodigo(
+        clientes, totalClientes, codigoCliente
+    );
+
+    if (indiceCliente == -1) {
+        printf(COR_VERMELHO "Cliente não cadastrado!\n" COR_RESET);
+        return 0;
+    }
+
+    printf("\nCliente: %s\n", clientes[indiceCliente].nome);
+
+    printf(COR_AZUL "\n========== SELECIONE O VENDEDOR ==========\n" COR_RESET);
+
+    listarVendedores(vendedores, totalVendedores);
+
+    if (totalVendedores == 0)
+        return 0;
+
+    if (lerInteiro("Código do vendedor que te atendeu: ", &codigoVendedor) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return 0;
+    }
+
+    int indiceVendedor = localizarVendedorPorCodigo(
+        vendedores, totalVendedores, codigoVendedor
+    );
+
+    if (indiceVendedor == -1) {
+        printf(COR_VERMELHO "Vendedor não encontrado!\n" COR_RESET);
+        return 0;
+    }
+
+    printf(COR_VERDE "\nVendedor selecionado: %s\n" COR_RESET,
+        vendedores[indiceVendedor].nome);
+
+    printf(COR_AMARELO "\nRegistro da venda ainda não implementado.\n" COR_RESET);
+
+    return 0;
+}

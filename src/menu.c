@@ -223,7 +223,15 @@ static void executarOpcao(
                 break;
 
             case 8:
-                printf(COR_AMARELO "Finalização de compra em desenvolvimento!\n" COR_RESET);
+                finalizarCompra(
+                    carrinho,
+                    *produtos,
+                    *totalProdutos,
+                    *vendedores,
+                    *totalVendedores,
+                    *clientes,
+                    *totalClientes
+                );
                 break;
 
             default:
