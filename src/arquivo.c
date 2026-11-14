@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "arquivo.h"
 #include "cores.h"
@@ -94,7 +95,9 @@ int carregarProdutos(Produto **produtos, int *total, int *capacidade) {
     FILE *arquivo = fopen("data/produtos.dat", "rb");
 
     if (arquivo == NULL) {
-        if (errno == ENOENT) return 1;
+        if (errno == ENOENT)
+            return 1;
+
         perror("Erro ao abrir produtos");
         return 0;
     }
@@ -179,7 +182,8 @@ int carregarVendedores(Vendedor **vendedores, int *total, int *capacidade) {
     FILE *arquivo = fopen("data/vendedores.dat", "rb");
 
     if (arquivo == NULL) {
-        if (errno == ENOENT) return 1;
+        if (errno == ENOENT)
+            return 1;
 
         perror("Erro ao abrir arquivo de vendedores");
         return 0;
@@ -268,7 +272,8 @@ int carregarClientes(Cliente **clientes, int *total, int *capacidade) {
     FILE *arquivo = fopen("data/clientes.dat", "rb");
 
     if (arquivo == NULL) {
-        if (errno == ENOENT) return 1;
+        if (errno == ENOENT)
+            return 1;
 
         perror("Erro ao abrir arquivo de clientes");
         return 0;
@@ -379,6 +384,9 @@ int salvarItensVenda(int codigoVenda, ItemVenda itens[], int totalItens) {
 }
 
 int proximoCodigoVenda(int *codigo) {
+    if (codigo == NULL)
+        return 0;
+
     FILE *arquivo = fopen("data/vendas.dat", "rb");
 
     *codigo = 1;
@@ -390,6 +398,21 @@ int proximoCodigoVenda(int *codigo) {
         perror("Erro ao abrir vendas");
         return 0;
     }
+
+    if (fseek(arquivo, 0, SEEK_END) != 0) {
+        fclose(arquivo);
+        return 0;
+    }
+
+    long tamanho = ftell(arquivo);
+
+    if (tamanho < 0 || (size_t)tamanho % sizeof(Venda) != 0) {
+        printf(COR_VERMELHO "Arquivo de vendas inválido!\n" COR_RESET);
+        fclose(arquivo);
+        return 0;
+    }
+
+    rewind(arquivo);
 
     Venda venda;
 
@@ -410,4 +433,107 @@ int proximoCodigoVenda(int *codigo) {
         sucesso = 0;
 
     return sucesso;
+}
+
+int registrarVendaArquivo(Venda venda, ItemVenda itens[], int totalItens) {
+    if (venda.codigo <= 0 || itens == NULL || totalItens <= 0) {
+        printf(COR_VERMELHO "Dados da venda inválidos!\n" COR_RESET);
+        return 0;
+    }
+
+    int quantidade = 0;
+
+    for (int i = 0; i < totalItens; i++) {
+        if (itens[i].codigoProduto <= 0 ||
+            itens[i].quantidade <= 0 ||
+            itens[i].precoUnitario < 0 ||
+            quantidade > INT_MAX - itens[i].quantidade) {
+            printf(COR_VERMELHO "Item de venda inválido!\n" COR_RESET);
+            return 0;
+        }
+
+        quantidade += itens[i].quantidade;
+    }
+
+    if (quantidade != venda.quantidadeItens) {
+        printf(COR_VERMELHO "Quantidade total da venda inválida!\n" COR_RESET);
+        return 0;
+    }
+
+    FILE *arquivoVendas = fopen("data/vendas.dat", "ab+");
+
+    if (arquivoVendas == NULL) {
+        perror("Erro ao abrir arquivo de vendas");
+        return 0;
+    }
+
+    FILE *arquivoItens = fopen("data/itens_venda.dat", "ab+");
+
+    if (arquivoItens == NULL) {
+        perror("Erro ao abrir arquivo de itens");
+        fclose(arquivoVendas);
+        return 0;
+    }
+
+    if (fseek(arquivoVendas, 0, SEEK_END) != 0 ||
+        fseek(arquivoItens, 0, SEEK_END) != 0) {
+        fclose(arquivoVendas);
+        fclose(arquivoItens);
+        return 0;
+    }
+
+    long tamanhoVendas = ftell(arquivoVendas);
+    long tamanhoItens = ftell(arquivoItens);
+
+    if (tamanhoVendas < 0 || tamanhoItens < 0 ||
+        (size_t)tamanhoVendas % sizeof(Venda) != 0 ||
+        (size_t)tamanhoItens % sizeof(ItemVendaRegistrado) != 0) {
+        printf(COR_VERMELHO "Histórico de vendas inválido!\n" COR_RESET);
+        fclose(arquivoVendas);
+        fclose(arquivoItens);
+        return 0;
+    }
+
+    int sucesso = 1;
+
+    for (int i = 0; i < totalItens; i++) {
+        ItemVendaRegistrado registro;
+
+        registro.codigoVenda = venda.codigo;
+        registro.item = itens[i];
+
+        if (fwrite(&registro, sizeof(ItemVendaRegistrado), 1, arquivoItens) != 1) {
+            sucesso = 0;
+            break;
+        }
+    }
+
+    if (sucesso && fwrite(&venda, sizeof(Venda), 1, arquivoVendas) != 1)
+        sucesso = 0;
+
+    if (fflush(arquivoItens) != 0)
+        sucesso = 0;
+
+    if (fflush(arquivoVendas) != 0)
+        sucesso = 0;
+
+    if (fclose(arquivoItens) == EOF)
+        sucesso = 0;
+
+    if (fclose(arquivoVendas) == EOF)
+        sucesso = 0;
+
+    if (!sucesso) {
+        int recuperouItens = truncate("data/itens_venda.dat", tamanhoItens) == 0;
+        int recuperouVendas = truncate("data/vendas.dat", tamanhoVendas) == 0;
+
+        printf(COR_VERMELHO "Erro ao registrar venda!\n" COR_RESET);
+
+        if (!recuperouItens || !recuperouVendas)
+            printf(COR_VERMELHO "Falha na recuperação! Verifique os arquivos de vendas.\n" COR_RESET);
+
+        return 0;
+    }
+
+    return 1;
 }

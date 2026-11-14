@@ -6,13 +6,9 @@
 #include "cliente.h"
 #include "venda.h"
 
-int salvarMovimentacao(
-    Movimentacao movimentacao
-);
+int salvarMovimentacao(Movimentacao movimentacao);
 
-void listarMovimentacoes(
-    void
-);
+void listarMovimentacoes(void);
 
 int salvarProdutos(
     Produto produtos[],
@@ -49,12 +45,12 @@ int salvarItensVenda(
     int totalItens
 );
 
+int proximoCodigoVenda(int *codigo);
+
 int registrarVendaArquivo(
     Venda venda,
     ItemVenda itens[],
     int totalItens
 );
-
-int proximoCodigoVenda(int *codigo);
 
 #endif
