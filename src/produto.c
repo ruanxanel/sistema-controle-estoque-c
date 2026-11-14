@@ -86,20 +86,20 @@ void listarProdutos(Produto produtos[], int total) {
         return;
     }
 
-    printf(COR_AZUL "\n========================= PRODUTOS CADASTRADOS =========================\n" COR_RESET);
-    printf("%-8s %-18s %-15s %10s %8s %8s\n",
+    printf(COR_AZUL "\n========================================= PRODUTOS CADASTRADOS =========================================\n" COR_RESET);
+    printf("%-8s %-35s %-18s %12s %8s %8s\n",
         "Código", "Produto", "Categoria", "Preço", "Qtd.", "Mín.");
-    printf("------------------------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------------------------------------------\n");
 
     for (int i = 0; i < total; i++) {
         Produto p = produtos[i];
 
-        printf("%-8d %-18.18s %-15.15s %10.2f %8d %8d\n",
+        printf("%-8d %-35s %-18s %12.2f %8d %8d\n",
             p.codigo, p.nome, p.categoria,
             p.preco, p.quantidade, p.estoqueMinimo);
     }
 
-    printf("------------------------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------------------------------------------\n");
     printf("Total de produtos: %d\n", total);
 }
 

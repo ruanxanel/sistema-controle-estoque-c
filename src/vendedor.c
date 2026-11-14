@@ -22,19 +22,19 @@ void listarVendedores(Vendedor vendedores[], int total) {
         return;
     }
 
-    printf(COR_AZUL "\n========================================\n");
-    printf("        VENDEDORES CADASTRADOS\n");
-    printf("========================================\n" COR_RESET);
+    printf(COR_AZUL "\n=====================================================\n");
+    printf("                 VENDEDORES CADASTRADOS\n");
+    printf("=====================================================\n" COR_RESET);
 
-    printf("%-8s %-20s\n", "Código", "Nome");
-    printf("----------------------------------------\n");
+    printf("%-8s %-40s\n", "Código", "Nome");
+    printf("-----------------------------------------------------\n");
 
     for (int i = 0; i < total; i++) {
-        printf("%-8d %-20.20s\n",
+        printf("%-8d %-40s\n",
             vendedores[i].codigo, vendedores[i].nome);
     }
 
-    printf("----------------------------------------\n");
+    printf("-----------------------------------------------------\n");
     printf("Total de vendedores: %d\n", total);
 }
 
