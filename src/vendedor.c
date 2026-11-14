@@ -22,21 +22,19 @@ void listarVendedores(Vendedor vendedores[], int total) {
         return;
     }
 
-    printf(COR_AZUL "\n================================================\n");
-    printf("             VENDEDORES CADASTRADOS\n");
-    printf("================================================\n" COR_RESET);
+    printf(COR_AZUL "\n========================================\n");
+    printf("        VENDEDORES CADASTRADOS\n");
+    printf("========================================\n" COR_RESET);
 
-    printf("%-8s %-20s %12s\n", "Código", "Nome", "Comissão");
-    printf("------------------------------------------------\n");
+    printf("%-8s %-20s\n", "Código", "Nome");
+    printf("----------------------------------------\n");
 
     for (int i = 0; i < total; i++) {
-        Vendedor v = vendedores[i];
-
-        printf("%-8d %-20.20s %11.2f%%\n",
-            v.codigo, v.nome, v.percentualComissao);
+        printf("%-8d %-20.20s\n",
+            vendedores[i].codigo, vendedores[i].nome);
     }
 
-    printf("------------------------------------------------\n");
+    printf("----------------------------------------\n");
     printf("Total de vendedores: %d\n", total);
 }
 
@@ -55,12 +53,6 @@ void cadastrarVendedor(Vendedor **vendedores, int *total, int *capacidade) {
 
     if (lerTexto("Nome do vendedor: ", v.nome, sizeof(v.nome)) != 1) {
         printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
-        return;
-    }
-
-    if (lerDouble("Comissão (%): ", &v.percentualComissao) != 1 ||
-        v.percentualComissao < 0 || v.percentualComissao > 100) {
-        printf(COR_VERMELHO "Comissão inválida! Informe de 0 a 100.\n" COR_RESET);
         return;
     }
 
@@ -88,8 +80,7 @@ void cadastrarVendedor(Vendedor **vendedores, int *total, int *capacidade) {
 
     (*vendedores)[(*total)++] = v;
 
-    printf(COR_VERDE "Vendedor %s cadastrado com sucesso!\n" COR_RESET,
-        v.nome);
+    printf(COR_VERDE "Vendedor %s cadastrado com sucesso!\n" COR_RESET, v.nome);
 }
 
 void buscarVendedor(Vendedor vendedores[], int total) {
@@ -107,16 +98,13 @@ void buscarVendedor(Vendedor vendedores[], int total) {
         return;
     }
 
-    Vendedor v = vendedores[indice];
-
-    printf("\nCódigo: %d\nNome: %s\nComissão: %.2f%%\n",
-        v.codigo, v.nome, v.percentualComissao);
+    printf("\nCódigo: %d\nNome: %s\n",
+        vendedores[indice].codigo, vendedores[indice].nome);
 }
 
 void editarVendedor(Vendedor vendedores[], int total) {
-    int codigo, opcao;
+    int codigo;
     char nome[100];
-    double comissao;
 
     if (lerInteiro("Código do vendedor: ", &codigo) != 1) {
         printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
@@ -130,46 +118,15 @@ void editarVendedor(Vendedor vendedores[], int total) {
         return;
     }
 
-    Vendedor *v = &vendedores[indice];
-
-    printf("\n[1] Alterar nome\n");
-    printf("[2] Alterar comissão\n");
-    printf("[3] Alterar ambos\n");
-
-    if (lerInteiro("Escolha uma opção: ", &opcao) != 1) {
-        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+    if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1) {
+        printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
         return;
     }
 
-    if (opcao < 1 || opcao > 3) {
-        printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
-        return;
-    }
-
-    if (opcao == 1 || opcao == 3) {
-        if (lerTexto("Novo nome: ", nome, sizeof(nome)) != 1) {
-            printf(COR_VERMELHO "Nome inválido!\n" COR_RESET);
-            return;
-        }
-    }
-
-    if (opcao == 2 || opcao == 3) {
-        if (lerDouble("Nova comissão (%): ", &comissao) != 1 ||
-            comissao < 0 || comissao > 100) {
-            printf(COR_VERMELHO "Comissão inválida!\n" COR_RESET);
-            return;
-        }
-    }
-
-    if (opcao == 1 || opcao == 3)
-        strcpy(v->nome, nome);
-
-    if (opcao == 2 || opcao == 3)
-        v->percentualComissao = comissao;
+    strcpy(vendedores[indice].nome, nome);
 
     printf(COR_VERDE "Vendedor atualizado com sucesso!\n" COR_RESET);
 }
-
 
 void excluirVendedor(Vendedor vendedores[], int *total) {
     int codigo;
