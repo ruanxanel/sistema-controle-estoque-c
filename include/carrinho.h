@@ -3,6 +3,8 @@
 
 #include "produto.h"
 #include "venda.h"
+#include "vendedor.h"
+#include "cliente.h"
 
 typedef struct {
     ItemVenda *itens;
@@ -33,6 +35,16 @@ void visualizarCarrinho(
     Carrinho *carrinho,
     Produto produtos[],
     int totalProdutos
+);
+
+int finalizarCompra(
+    Carrinho *carrinho,
+    Produto produtos[],
+    int totalProdutos,
+    Vendedor vendedores[],
+    int totalVendedores,
+    Cliente clientes[],
+    int totalClientes
 );
 
 #endif
