@@ -280,6 +280,39 @@ int lerOpcaoPrincipal(
         return 1;
     }
 
+    if (opcao == 3) {
+        int codigoCliente;
+
+        if (*totalClientes == 0) {
+            printf(COR_AMARELO "Nenhum cliente cadastrado!\n" COR_RESET);
+            return 1;
+        }
+
+        listarClientes(*clientes, *totalClientes);
+
+        if (lerInteiro("Informe seu código de cliente: ", &codigoCliente) != 1) {
+            printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+            return 1;
+        }
+
+        int indice = localizarClientePorCodigo(
+            *clientes,
+            *totalClientes,
+            codigoCliente
+        );
+
+        if (indice == -1) {
+            printf(COR_VERMELHO "Cliente não cadastrado!\n" COR_RESET);
+            return 1;
+        }
+
+        carrinho->total = 0;
+        carrinho->codigoCliente = codigoCliente;
+
+        printf(COR_VERDE "\nBem-vindo(a), %s!\n" COR_RESET,
+            (*clientes)[indice].nome);
+    }
+
     int escolha = -1;
 
     do {
@@ -287,8 +320,14 @@ int lerOpcaoPrincipal(
 
         int resultado = lerInteiro("Escolha uma opção: ", &escolha);
 
-        if (resultado == -1)
+        if (resultado == -1) {
+            if (opcao == 3) {
+                carrinho->total = 0;
+                carrinho->codigoCliente = 0;
+            }
+
             return 0;
+        }
 
         if (resultado == 0)
             continue;
@@ -312,6 +351,11 @@ int lerOpcaoPrincipal(
         );
 
     } while (escolha != 0);
+
+    if (opcao == 3) {
+        carrinho->total = 0;
+        carrinho->codigoCliente = 0;
+    }
 
     printf(COR_VERDE "Voltando ao menu principal...\n" COR_RESET);
     return 1;

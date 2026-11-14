@@ -10,6 +10,7 @@ typedef struct {
     ItemVenda *itens;
     int total;
     int capacidade;
+    int codigoCliente;
 } Carrinho;
 
 int inicializarCarrinho(Carrinho *carrinho);

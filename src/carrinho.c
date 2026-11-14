@@ -14,6 +14,7 @@
 int inicializarCarrinho(Carrinho *carrinho) {
     carrinho->total = 0;
     carrinho->capacidade = 2;
+    carrinho->codigoCliente = 0;
 
     carrinho->itens = malloc(carrinho->capacidade * sizeof(ItemVenda));
 
@@ -31,6 +32,7 @@ void liberarCarrinho(Carrinho *carrinho) {
     carrinho->itens = NULL;
     carrinho->total = 0;
     carrinho->capacidade = 0;
+    carrinho->codigoCliente = 0;
 }
 
 void adicionarAoCarrinho(Carrinho *carrinho, Produto produtos[], int totalProdutos) {
@@ -310,7 +312,8 @@ int finalizarCompra(
     Cliente clientes[],
     int totalClientes
 ) {
-    int codigoCliente, codigoVendedor;
+    int codigoCliente = carrinho->codigoCliente;
+    int codigoVendedor;
 
     if (carrinho->total == 0) {
         printf(COR_AMARELO "O carrinho está vazio!\n" COR_RESET);
@@ -319,8 +322,8 @@ int finalizarCompra(
 
     visualizarCarrinho(carrinho, produtos, totalProdutos);
 
-    if (lerInteiro("Código do cliente: ", &codigoCliente) != 1) {
-        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+    if (codigoCliente <= 0) {
+        printf(COR_VERMELHO "Nenhum cliente identificado!\n" COR_RESET);
         return 0;
     }
 
