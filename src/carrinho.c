@@ -8,6 +8,7 @@
 #include "produto.h"
 #include "arquivo.h"
 #include "venda.h"
+#include "data.h"
 #include "cores.h"
 
 int inicializarCarrinho(Carrinho *carrinho) {
@@ -400,8 +401,34 @@ int finalizarCompra(
         return 0;
     }
 
+    Venda venda = {0};
+
+    if (!proximoCodigoVenda(&venda.codigo)) {
+        printf(COR_VERMELHO "Erro ao gerar código da venda!\n" COR_RESET);
+        return 0;
+    }
+
+    venda.codigoCliente = codigoCliente;
+    venda.codigoVendedor = codigoVendedor;
+    venda.quantidadeItens = totalUnidades;
+    venda.valorTotal = valorTotal;
+    venda.comissao = comissao;
+
+    if (!obterDataHora(venda.dataHora, sizeof(venda.dataHora))) {
+        printf(COR_VERMELHO "Erro ao registrar data da venda!\n" COR_RESET);
+        return 0;
+    }
+
+    printf(COR_AZUL "\n========== DADOS DA VENDA ==========\n" COR_RESET);
+    printf("Código: %d\n", venda.codigo);
+    printf("Cliente: %s\n", clientes[indiceCliente].nome);
+    printf("Vendedor: %s\n", vendedores[indiceVendedor].nome);
+    printf("Data: %s\n", venda.dataHora);
+    printf("Total: R$ %.2f\n", venda.valorTotal);
+    printf("Comissão: R$ %.2f\n", venda.comissao);
+
     printf(COR_AMARELO
-        "Confirmação recebida. Registro definitivo ainda não habilitado.\n"
+        "\nDados preparados. Gravação definitiva ainda não habilitada.\n"
         COR_RESET);
 
     return 0;
