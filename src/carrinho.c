@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "carrinho.h"
+#include "entrada.h"
+#include "produto.h"
 #include "cores.h"
 
 int inicializarCarrinho(Carrinho *carrinho) {
@@ -24,4 +26,82 @@ void liberarCarrinho(Carrinho *carrinho) {
     carrinho->itens = NULL;
     carrinho->total = 0;
     carrinho->capacidade = 0;
+}
+
+void adicionarAoCarrinho(Carrinho *carrinho, Produto produtos[], int totalProdutos) {
+    int codigo, quantidade;
+
+    listarProdutos(produtos, totalProdutos);
+
+    if (totalProdutos == 0)
+        return;
+
+    if (lerInteiro("Código do produto: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarProdutoPorCodigo(produtos, totalProdutos, codigo);
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Produto não encontrado!\n" COR_RESET);
+        return;
+    }
+
+    Produto *produto = &produtos[indice];
+
+    if (lerInteiro("Quantidade: ", &quantidade) != 1 || quantidade <= 0) {
+        printf(COR_VERMELHO "Quantidade inválida!\n" COR_RESET);
+        return;
+    }
+
+    int indiceCarrinho = -1;
+
+    for (int i = 0; i < carrinho->total; i++) {
+        if (carrinho->itens[i].codigoProduto == codigo) {
+            indiceCarrinho = i;
+            break;
+        }
+    }
+
+    int quantidadeAtual = 0;
+
+    if (indiceCarrinho != -1)
+        quantidadeAtual = carrinho->itens[indiceCarrinho].quantidade;
+
+    if (quantidade > produto->quantidade - quantidadeAtual) {
+        printf(COR_VERMELHO "Estoque insuficiente!\n" COR_RESET);
+        return;
+    }
+
+    if (indiceCarrinho != -1) {
+        carrinho->itens[indiceCarrinho].quantidade += quantidade;
+    } else {
+        if (carrinho->total == carrinho->capacidade) {
+            int novaCapacidade = carrinho->capacidade * 2;
+
+            ItemVenda *temp = realloc(
+                carrinho->itens,
+                novaCapacidade * sizeof(ItemVenda)
+            );
+
+            if (temp == NULL) {
+                printf(COR_VERMELHO "Erro ao aumentar carrinho!\n" COR_RESET);
+                return;
+            }
+
+            carrinho->itens = temp;
+            carrinho->capacidade = novaCapacidade;
+        }
+
+        ItemVenda item;
+
+        item.codigoProduto = codigo;
+        item.quantidade = quantidade;
+        item.precoUnitario = produto->preco;
+
+        carrinho->itens[carrinho->total++] = item;
+    }
+
+    printf(COR_VERDE "Produto adicionado ao carrinho!\n" COR_RESET);
 }
