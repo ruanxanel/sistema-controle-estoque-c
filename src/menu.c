@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "produto.h"
 #include "vendedor.h"
+#include "cliente.h"
 #include "estoque.h"
 #include "arquivo.h"
 #include "entrada.h"
@@ -30,15 +31,19 @@ static void exibirMenu(int perfil) {
         printf("       CONTROLE DE ESTOQUE E VENDAS\n");
     else if (perfil == 1)
         printf("             PAINEL ADMINISTRADOR\n");
+    else if (perfil == 2)
+        printf("               PAINEL VENDEDOR\n");
     else
-        printf("                PAINEL USUÁRIO\n");
+        printf("                PAINEL CLIENTE\n");
 
     printf("============================================\n" COR_RESET);
 
     if (perfil == 0) {
         printf("\n[1] Administrador\n");
-        printf("[2] Usuário\n");
+        printf("[2] Vendedor\n");
+        printf("[3] Cliente\n");
         printf("[0] Sair\n");
+
     } else if (perfil == 1) {
         printf("\n[1] Cadastrar produto\n");
         printf("[2] Listar produtos\n");
@@ -62,14 +67,16 @@ static void exibirMenu(int perfil) {
         printf("[17] Buscar cliente\n");
 
         printf("\n[0] Voltar ao menu principal\n");
+
+    } else if (perfil == 2) {
+        printf("\n[1] Listar produtos\n");
+        printf("[2] Buscar produto\n");
+        printf("[0] Voltar ao menu principal\n");
+
     } else {
         printf("\n[1] Listar produtos\n");
         printf("[2] Buscar produto\n");
-        printf("[3] Registrar entrada\n");
-        printf("[4] Registrar saída\n");
-        printf("[5] Produtos com estoque baixo\n");
-        printf("[6] Histórico de movimentações\n");
-        printf("\n[0] Voltar ao menu principal\n");
+        printf("[0] Voltar ao menu principal\n");
     }
 
     printf("\n--------------------------------------------\n");
@@ -93,45 +100,59 @@ static void executarOpcao(
             case 1:
                 cadastrarProduto(produtos, totalProdutos, capacidadeProdutos);
                 break;
+
             case 2:
                 listarProdutos(*produtos, *totalProdutos);
                 break;
+
             case 3:
                 buscarProduto(*produtos, *totalProdutos);
                 break;
+
             case 4:
                 editarProduto(*produtos, *totalProdutos);
                 break;
+
             case 5:
                 excluirProduto(*produtos, totalProdutos);
                 break;
+
             case 6:
                 registrarEntrada(*produtos, *totalProdutos);
                 break;
+
             case 7:
                 registrarSaida(*produtos, *totalProdutos);
                 break;
+
             case 8:
                 listarEstoqueBaixo(*produtos, *totalProdutos);
                 break;
+
             case 9:
                 listarMovimentacoes();
                 break;
+
             case 10:
                 cadastrarVendedor(vendedores, totalVendedores, capacidadeVendedores);
                 break;
+
             case 11:
                 listarVendedores(*vendedores, *totalVendedores);
                 break;
+
             case 12:
                 buscarVendedor(*vendedores, *totalVendedores);
                 break;
+
             case 13:
                 editarVendedor(*vendedores, *totalVendedores);
                 break;
+
             case 14:
                 excluirVendedor(*vendedores, totalVendedores);
                 break;
+
             case 15:
                 cadastrarCliente(clientes, totalClientes, capacidadeClientes);
                 break;
@@ -143,29 +164,21 @@ static void executarOpcao(
             case 17:
                 buscarCliente(*clientes, *totalClientes);
                 break;
+
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         }
-    } else {
+
+    } else if (perfil == 2 || perfil == 3) {
         switch (opcao) {
             case 1:
                 listarProdutos(*produtos, *totalProdutos);
                 break;
+
             case 2:
                 buscarProduto(*produtos, *totalProdutos);
                 break;
-            case 3:
-                registrarEntrada(*produtos, *totalProdutos);
-                break;
-            case 4:
-                registrarSaida(*produtos, *totalProdutos);
-                break;
-            case 5:
-                listarEstoqueBaixo(*produtos, *totalProdutos);
-                break;
-            case 6:
-                listarMovimentacoes();
-                break;
+
             default:
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         }
@@ -195,7 +208,7 @@ int lerOpcaoPrincipal(
         return 1;
     }
 
-    if (opcao != 1 && opcao != 2) {
+    if (opcao != 1 && opcao != 2 && opcao != 3) {
         printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         return 1;
     }
@@ -207,9 +220,14 @@ int lerOpcaoPrincipal(
 
         int resultado = lerInteiro("Escolha uma opção: ", &escolha);
 
-        if (resultado == -1) return 0;
-        if (resultado == 0) continue;
-        if (escolha == 0) break;
+        if (resultado == -1)
+            return 0;
+
+        if (resultado == 0)
+            continue;
+
+        if (escolha == 0)
+            break;
 
         executarOpcao(
             opcao,
