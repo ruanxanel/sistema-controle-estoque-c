@@ -419,17 +419,28 @@ int finalizarCompra(
         return 0;
     }
 
-    printf(COR_AZUL "\n========== DADOS DA VENDA ==========\n" COR_RESET);
-    printf("Código: %d\n", venda.codigo);
+    if (!registrarCompraCompleta(
+        venda,
+        carrinho->itens,
+        carrinho->total,
+        produtos,
+        totalProdutos
+    )) {
+        printf(COR_VERMELHO "Não foi possível concluir a compra!\n" COR_RESET);
+        return 0;
+    }
+
+    carrinho->total = 0;
+
+    printf(COR_VERDE "\n========== COMPRA FINALIZADA ==========\n" COR_RESET);
+    printf("Código da venda: %d\n", venda.codigo);
     printf("Cliente: %s\n", clientes[indiceCliente].nome);
     printf("Vendedor: %s\n", vendedores[indiceVendedor].nome);
     printf("Data: %s\n", venda.dataHora);
-    printf("Total: R$ %.2f\n", venda.valorTotal);
-    printf("Comissão: R$ %.2f\n", venda.comissao);
+    printf("Total de unidades: %d\n", venda.quantidadeItens);
+    printf("Valor total: R$ %.2f\n", venda.valorTotal);
+    printf("Comissão do vendedor: R$ %.2f\n", venda.comissao);
+    printf(COR_VERDE "\nCompra realizada com sucesso!\n" COR_RESET);
 
-    printf(COR_AMARELO
-        "\nDados preparados. Gravação definitiva ainda não habilitada.\n"
-        COR_RESET);
-
-    return 0;
+    return 1;
 }

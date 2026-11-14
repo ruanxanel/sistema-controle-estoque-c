@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "menu.h"
 #include "entrada.h"
@@ -72,6 +73,33 @@ int main(void) {
             break;
 
     } while (opcao != 0);
+
+    FILE *pendente = fopen("data/compra.pendente", "rb");
+
+    if (pendente != NULL) {
+        fclose(pendente);
+
+        printf(COR_VERMELHO
+            "Existe uma compra pendente de recuperação!\n"
+            "Os dados não serão sobrescritos.\n"
+            COR_RESET);
+
+        liberarCarrinho(&carrinho);
+        free(produtos);
+        free(vendedores);
+        free(clientes);
+        return 1;
+    }
+
+    if (errno != ENOENT) {
+        perror("Erro ao verificar recuperação");
+
+        liberarCarrinho(&carrinho);
+        free(produtos);
+        free(vendedores);
+        free(clientes);
+        return 1;
+    }
 
     int salvouProdutos = salvarProdutos(produtos, totalProdutos);
     int salvouVendedores = salvarVendedores(vendedores, totalVendedores);
