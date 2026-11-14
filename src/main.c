@@ -6,6 +6,7 @@
 #include "produto.h"
 #include "vendedor.h"
 #include "cliente.h"
+#include "carrinho.h"
 #include "arquivo.h"
 #include "cores.h"
 
@@ -14,6 +15,7 @@ int main(void) {
     int totalProdutos = 0, capacidadeProdutos = 2;
     int totalVendedores = 0, capacidadeVendedores = 2;
     int totalClientes = 0, capacidadeClientes = 2;
+    Carrinho carrinho;
 
     Produto *produtos = malloc(capacidadeProdutos * sizeof(Produto));
     Vendedor *vendedores = malloc(capacidadeVendedores * sizeof(Vendedor));
@@ -36,13 +38,23 @@ int main(void) {
         return 1;
     }
 
+    if (!inicializarCarrinho(&carrinho)) {
+        free(produtos);
+        free(vendedores);
+        free(clientes);
+        return 1;
+    }
+
     do {
         menuPrincipal();
 
         int resultado = lerInteiro("Escolha uma opção: ", &opcao);
 
-        if (resultado == 0) continue;
-        if (resultado == -1) break;
+        if (resultado == 0)
+            continue;
+
+        if (resultado == -1)
+            break;
 
         if (!lerOpcaoPrincipal(
             opcao,
@@ -54,7 +66,8 @@ int main(void) {
             &capacidadeVendedores,
             &clientes,
             &totalClientes,
-            &capacidadeClientes
+            &capacidadeClientes,
+            &carrinho
         ))
             break;
 
@@ -63,6 +76,8 @@ int main(void) {
     int salvouProdutos = salvarProdutos(produtos, totalProdutos);
     int salvouVendedores = salvarVendedores(vendedores, totalVendedores);
     int salvouClientes = salvarClientes(clientes, totalClientes);
+
+    liberarCarrinho(&carrinho);
 
     free(produtos);
     free(vendedores);

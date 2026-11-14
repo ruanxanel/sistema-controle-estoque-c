@@ -4,6 +4,7 @@
 #include "produto.h"
 #include "vendedor.h"
 #include "cliente.h"
+#include "carrinho.h"
 #include "estoque.h"
 #include "arquivo.h"
 #include "entrada.h"
@@ -18,6 +19,7 @@ static void pausarTela(void) {
     int c;
     printf("\nPressione ENTER para continuar...");
     fflush(stdout);
+
     while ((c = getchar()) != '\n' && c != EOF) {}
 }
 
@@ -74,8 +76,14 @@ static void exibirMenu(int perfil) {
         printf("[0] Voltar ao menu principal\n");
 
     } else {
-        printf("\n[1] Listar produtos\n");
+        printf("\n[1] Visualizar catálogo\n");
         printf("[2] Buscar produto\n");
+        printf("[3] Adicionar ao carrinho\n");
+        printf("[4] Visualizar carrinho\n");
+        printf("[5] Editar quantidade\n");
+        printf("[6] Excluir produto do carrinho\n");
+        printf("[7] Limpar carrinho\n");
+        printf("[8] Finalizar compra\n");
         printf("[0] Voltar ao menu principal\n");
     }
 
@@ -93,7 +101,8 @@ static void executarOpcao(
     int *capacidadeVendedores,
     Cliente **clientes,
     int *totalClientes,
-    int *capacidadeClientes
+    int *capacidadeClientes,
+    Carrinho *carrinho
 ) {
     if (perfil == 1) {
         switch (opcao) {
@@ -169,7 +178,7 @@ static void executarOpcao(
                 printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
         }
 
-    } else if (perfil == 2 || perfil == 3) {
+    } else if (perfil == 2) {
         switch (opcao) {
             case 1:
                 listarProdutos(*produtos, *totalProdutos);
@@ -177,6 +186,44 @@ static void executarOpcao(
 
             case 2:
                 buscarProduto(*produtos, *totalProdutos);
+                break;
+
+            default:
+                printf(COR_VERMELHO "Opção inválida!\n" COR_RESET);
+        }
+
+    } else if (perfil == 3) {
+        switch (opcao) {
+            case 1:
+                listarProdutos(*produtos, *totalProdutos);
+                break;
+
+            case 2:
+                buscarProduto(*produtos, *totalProdutos);
+                break;
+
+            case 3:
+                adicionarAoCarrinho(carrinho, *produtos, *totalProdutos);
+                break;
+
+            case 4:
+                visualizarCarrinho(carrinho, *produtos, *totalProdutos);
+                break;
+
+            case 5:
+                editarQuantidadeCarrinho(carrinho, *produtos, *totalProdutos);
+                break;
+
+            case 6:
+                removerDoCarrinho(carrinho);
+                break;
+
+            case 7:
+                limparCarrinho(carrinho);
+                break;
+
+            case 8:
+                printf(COR_AMARELO "Finalização de compra em desenvolvimento!\n" COR_RESET);
                 break;
 
             default:
@@ -201,7 +248,8 @@ int lerOpcaoPrincipal(
     int *capacidadeVendedores,
     Cliente **clientes,
     int *totalClientes,
-    int *capacidadeClientes
+    int *capacidadeClientes,
+    Carrinho *carrinho
 ) {
     if (opcao == 0) {
         printf(COR_VERDE "Saindo...\n" COR_RESET);
@@ -240,7 +288,8 @@ int lerOpcaoPrincipal(
             capacidadeVendedores,
             clientes,
             totalClientes,
-            capacidadeClientes
+            capacidadeClientes,
+            carrinho
         );
 
     } while (escolha != 0);
