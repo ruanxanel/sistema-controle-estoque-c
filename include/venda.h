@@ -28,4 +28,14 @@ typedef struct {
 
 double calcularComissao(int quantidadeItens, double valorTotal);
 
+void listarVendasVendedor(
+    Vendedor vendedores[],
+    int totalVendedores
+);
+
+void listarComissoesVendedor(
+    Vendedor vendedores[],
+    int totalVendedores
+);
+
 #endif

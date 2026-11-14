@@ -8,6 +8,7 @@
 #include "estoque.h"
 #include "arquivo.h"
 #include "entrada.h"
+#include "venda.h"
 #include "cores.h"
 
 static void limparTela(void) {
@@ -73,6 +74,8 @@ static void exibirMenu(int perfil) {
     } else if (perfil == 2) {
         printf("\n[1] Listar produtos\n");
         printf("[2] Buscar produto\n");
+        printf("[3] Minhas vendas\n");
+        printf("[4] Minhas comissões\n");
         printf("[0] Voltar ao menu principal\n");
 
     } else {
@@ -186,6 +189,14 @@ static void executarOpcao(
 
             case 2:
                 buscarProduto(*produtos, *totalProdutos);
+                break;
+
+            case 3:
+                listarVendasVendedor(*vendedores, *totalVendedores);
+                break;
+
+            case 4:
+                listarComissoesVendedor(*vendedores, *totalVendedores);
                 break;
 
             default:
