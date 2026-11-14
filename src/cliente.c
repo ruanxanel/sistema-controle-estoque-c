@@ -59,3 +59,44 @@ void cadastrarCliente(Cliente **clientes, int *total, int *capacidade) {
 
     printf(COR_VERDE "Cliente %s cadastrado com sucesso!\n" COR_RESET, c.nome);
 }
+
+void listarClientes(Cliente clientes[], int total) {
+    if (total == 0) {
+        printf(COR_AMARELO "Nenhum cliente cadastrado!\n" COR_RESET);
+        return;
+    }
+
+    printf(COR_AZUL "\n========================================\n");
+    printf("          CLIENTES CADASTRADOS\n");
+    printf("========================================\n" COR_RESET);
+
+    printf("%-8s %-20s\n", "Código", "Nome");
+    printf("----------------------------------------\n");
+
+    for (int i = 0; i < total; i++) {
+        printf("%-8d %-20.20s\n",
+            clientes[i].codigo, clientes[i].nome);
+    }
+
+    printf("----------------------------------------\n");
+    printf("Total de clientes: %d\n", total);
+}
+
+void buscarCliente(Cliente clientes[], int total) {
+    int codigo;
+
+    if (lerInteiro("Código do cliente: ", &codigo) != 1) {
+        printf(COR_VERMELHO "Código inválido!\n" COR_RESET);
+        return;
+    }
+
+    int indice = localizarClientePorCodigo(clientes, total, codigo);
+
+    if (indice == -1) {
+        printf(COR_VERMELHO "Cliente não encontrado!\n" COR_RESET);
+        return;
+    }
+
+    printf("\nCódigo: %d\nNome: %s\n",
+        clientes[indice].codigo, clientes[indice].nome);
+}
